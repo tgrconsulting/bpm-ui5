@@ -1,0 +1,1 @@
+export const TABLE_ROW_LIMIT = 100;
