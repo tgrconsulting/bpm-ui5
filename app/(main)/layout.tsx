@@ -1,8 +1,8 @@
-import './UI5Registry';
-import './globals.css';
+import '@/app/UI5Registry';
+import '@/app/globals.css';
 import { AuthProvider } from '@/app/components/providers';
 import { ThemeProvider } from '@ui5/webcomponents-react';
-import UI5HybridWrapper from './components/ui5-client-layout-loader';
+import UI5HybridWrapper from '../components/ui5-client-layout-loader';
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
