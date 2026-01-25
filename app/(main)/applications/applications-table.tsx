@@ -48,7 +48,7 @@ export function ApplicationsTable({ data, hasMore, onLoadMore, onEdit, onDelete 
    * This ensures the sort indicator is visible on the first render.
    */
   const [sortConfig, setSortConfig] = useState<SortConfig>({
-    column: 'applicationid',
+    column: 'application_id',
     order: 'Ascending',
   });
 
@@ -89,8 +89,8 @@ export function ApplicationsTable({ data, hasMore, onLoadMore, onEdit, onDelete 
           {/* Application ID Column */}
           <TableHeaderCell
             // Dynamically reflects the initial 'Ascending' state
-            sortIndicator={sortConfig.column === 'applicationid' ? sortConfig.order : 'None'}
-            onClick={() => handleSort('applicationid')}
+            sortIndicator={sortConfig.column === 'application_id' ? sortConfig.order : 'None'}
+            onClick={() => handleSort('application_id')}
           >
             <Label>Application</Label>
           </TableHeaderCell>
@@ -116,24 +116,24 @@ export function ApplicationsTable({ data, hasMore, onLoadMore, onEdit, onDelete 
     >
       {sortedData.map((row) => (
         <TableRow
-          key={row.applicationid}
+          key={row.application_id}
           actions={
             <>
               <TableRowAction
                 icon="edit"
                 text="Edit"
-                onClick={() => onEdit(row.applicationid)}
+                onClick={() => onEdit(row.application_id)}
               />
               <TableRowAction
                 icon="delete"
                 text="Delete"
-                onClick={() => onDelete(row.applicationid)}
+                onClick={() => onDelete(row.application_id)}
               />
             </>
           }
         >
           <TableCell>
-            <Label>{row.applicationid}</Label>
+            <Label>{row.application_id}</Label>
           </TableCell>
           <TableCell>
             <Label>{row.description}</Label>

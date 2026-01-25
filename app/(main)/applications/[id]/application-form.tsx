@@ -23,7 +23,7 @@ export default function ApplicationForm({ initialData }: ApplicationFormProps) {
   // Hooks & Constants
   // ---------------------------------------------------------------------------
   const router = useRouter();
-  const isUpdate = Boolean(initialData.applicationid?.trim());
+  const isUpdate = Boolean(initialData.application_id?.trim());
 
   // ---------------------------------------------------------------------------
   // State Management
@@ -34,7 +34,7 @@ export default function ApplicationForm({ initialData }: ApplicationFormProps) {
     message: string;
   } | null>(null);
   const [errors, setErrors] = useState({
-    applicationid: false,
+    application_id: false,
     description: false,
   });
 
@@ -50,13 +50,13 @@ export default function ApplicationForm({ initialData }: ApplicationFormProps) {
 
     // Validation
     const newErrors = {
-      applicationid: !formData.applicationid.trim(),
+      application_id: !formData.application_id.trim(),
       description: !formData.description.trim(),
     };
 
     setErrors(newErrors);
 
-    if (newErrors.applicationid || newErrors.description) {
+    if (newErrors.application_id || newErrors.description) {
       setSaveStatus({ design: 'Negative', message: 'Please fix validation errors.' });
       return;
     }
@@ -65,7 +65,7 @@ export default function ApplicationForm({ initialData }: ApplicationFormProps) {
     let result: ActionResult;
 
     if (isUpdate) {
-      result = await UpdateApplication(formData.applicationid, {
+      result = await UpdateApplication(formData.application_id, {
         description: formData.description,
       });
     } else {
@@ -150,14 +150,14 @@ export default function ApplicationForm({ initialData }: ApplicationFormProps) {
         {/* Application ID Field */}
         <FormItem labelContent={<Label required>Application</Label>}>
           <Input
-            value={formData.applicationid}
+            value={formData.application_id}
             type="Text"
             readonly={isUpdate}
-            valueState={errors.applicationid ? 'Negative' : 'None'}
+            valueState={errors.application_id ? 'Negative' : 'None'}
             valueStateMessage={<div>Application ID is required.</div>}
             onInput={(e: any) => {
-              setFormData({ ...formData, applicationid: e.target.value });
-              if (errors.applicationid) setErrors({ ...errors, applicationid: false });
+              setFormData({ ...formData, application_id: e.target.value });
+              if (errors.application_id) setErrors({ ...errors, application_id: false });
             }}
           />
         </FormItem>

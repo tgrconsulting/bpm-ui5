@@ -6,7 +6,7 @@ import { revalidatePath } from 'next/cache';
 // --- Types ---
 
 export interface Application {
-  applicationid: string;
+  application_id: string;
   description: string;
 }
 
@@ -24,7 +24,7 @@ export async function ReadApplications(
 ): Promise<ActionResult<{ applications: Application[]; hasMore: boolean }>> {
   try {
     const result = await query(
-      'SELECT applicationid, description FROM "tblApplications" ORDER BY applicationid ASC LIMIT $1 OFFSET $2',
+      'SELECT application_id, description FROM tbl_applications ORDER BY application_id ASC LIMIT $1 OFFSET $2',
       [limit + 1, offset],
     );
 
@@ -46,7 +46,7 @@ export async function ReadApplications(
 
 export async function ReadApplication(id: string): Promise<ActionResult<Application>> {
   try {
-    const result = await query('SELECT applicationid, description FROM "tblApplications" WHERE applicationid = $1', [
+    const result = await query('SELECT application_id, description FROM tbl_applications WHERE application_id = $1', [
       id,
     ]);
 
@@ -67,18 +67,18 @@ export async function ReadApplication(id: string): Promise<ActionResult<Applicat
 export async function CreateApplication(application: Application): Promise<ActionResult> {
   try {
     const sql = `
-      INSERT INTO "tblApplications" (applicationid, description)
+      INSERT INTO tbl_applications (application_id, description)
       VALUES ($1, $2)
-      ON CONFLICT (applicationid) DO NOTHING
-      RETURNING applicationid
+      ON CONFLICT (application_id) DO NOTHING
+      RETURNING application_id
     `;
 
-    const result = await query(sql, [application.applicationid.trim(), application.description.trim()]);
+    const result = await query(sql, [application.application_id.trim(), application.description.trim()]);
 
     if (result.rows.length === 0) {
       return {
         success: false,
-        error: `Application ID "${application.applicationid}" already exists.`,
+        error: `Application ID "${application.application_id}" already exists.`,
       };
     }
 
@@ -92,7 +92,7 @@ export async function CreateApplication(application: Application): Promise<Actio
 
 export async function UpdateApplication(
   id: string,
-  updates: Partial<Omit<Application, 'applicationid'>>,
+  updates: Partial<Omit<Application, 'application_id'>>,
 ): Promise<ActionResult> {
   try {
     if (!updates.description) {
@@ -100,10 +100,10 @@ export async function UpdateApplication(
     }
 
     const sql = `
-      UPDATE "tblApplications"
+      UPDATE tbl_applications
       SET description = $1
-      WHERE applicationid = $2
-      RETURNING applicationid
+      WHERE application_id = $2
+      RETURNING application_id
     `;
 
     const result = await query(sql, [updates.description.trim(), id]);
@@ -128,7 +128,7 @@ export async function UpdateApplication(
 
 export async function DeleteApplication(id: string): Promise<ActionResult> {
   try {
-    await query('DELETE FROM "tblApplications" WHERE applicationid = $1', [id]);
+    await query('DELETE FROM tbl_applications WHERE application_id = $1', [id]);
 
     revalidatePath('/applications');
     return { success: true };
