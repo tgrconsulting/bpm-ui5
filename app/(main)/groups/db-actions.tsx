@@ -123,12 +123,34 @@ export async function UpdateGroup(id: string, updates: Partial<Omit<Group, 'grou
 
 export async function DeleteGroup(id: string): Promise<ActionResult> {
   try {
-    await query('DELETE FROM tbl_groups WHERE group_id = $1', [id]);
+    // 1. Check if any process is currently using this group_id
+    const checkResult = await query('SELECT process_id FROM tbl_processes WHERE group_id = $1 LIMIT 1', [id]);
+
+    if (checkResult.rowCount && checkResult.rowCount > 0) {
+      const processId = checkResult.rows[0].process_id;
+      return {
+        success: false,
+        error: `Cannot delete Group "${id}" because it is still being used by at least one process (e.g., Process: ${processId}).`,
+      };
+    }
+
+    // 2. Proceed with deletion if no references found
+    const deleteResult = await query('DELETE FROM tbl_groups WHERE group_id = $1 RETURNING group_id', [id]);
+
+    if (deleteResult.rowCount === 0) {
+      return {
+        success: false,
+        error: `Group with ID "${id}" not found or already deleted.`,
+      };
+    }
 
     revalidatePath('/Groups');
     return { success: true };
   } catch (error) {
     console.error('Failed to delete:', error);
-    return { success: false, error: 'Database error occurred during deletion.' };
+    return {
+      success: false,
+      error: 'A database error occurred during deletion. Please ensure no other records depend on this group.',
+    };
   }
 }

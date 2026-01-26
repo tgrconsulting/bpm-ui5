@@ -133,7 +133,7 @@ export default function ProcessPage() {
           <Bar
             design="Header"
             style={{ height: '3.5rem' }}
-            startContent={<Title>Process</Title>}
+            startContent={<Title>Processes</Title>}
             endContent={
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <Button
