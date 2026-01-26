@@ -201,7 +201,7 @@ export default function GroupsPage() {
               data={filteredData}
               hasMore={searchQuery ? false : hasMore}
               onLoadMore={() => loadMoreData()}
-              onEdit={(id) => router.push(`/Groups/${id}`)}
+              onEdit={(id) => router.push(`/groups/${id}`)}
               onDelete={(id) => setPendingDeleteId(id)}
             />
           </div>

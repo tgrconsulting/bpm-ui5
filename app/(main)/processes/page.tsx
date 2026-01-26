@@ -201,7 +201,7 @@ export default function ProcessPage() {
               data={filteredData}
               hasMore={searchQuery ? false : hasMore}
               onLoadMore={() => loadMoreData()}
-              onEdit={(id) => router.push(`/Process/${id}`)}
+              onEdit={(id) => router.push(`/processes/${id}`)}
               onDelete={(id) => setPendingDeleteId(id)}
             />
           </div>

@@ -5,7 +5,19 @@
 // =============================================================================
 import '@ui5/webcomponents-icons/dist/nav-back.js';
 import '@ui5/webcomponents-icons/dist/save.js';
-import { Bar, Button, Form, FormItem, Input, Label, Page, Title, MessageStrip } from '@ui5/webcomponents-react';
+import {
+  Bar,
+  Button,
+  Form,
+  FormItem,
+  Input,
+  Label,
+  Page,
+  Title,
+  MessageStrip,
+  ComboBox,
+  ComboBoxItem,
+} from '@ui5/webcomponents-react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { Process, CreateProcess, UpdateProcess, ActionResult } from '../db-actions';
@@ -14,16 +26,15 @@ interface ProcessFormProps {
   initialData: Process;
 }
 
-/**
- * ProcessForm Component
- * Handles both the creation of new Processs and editing existing ones.
- */
 export default function ProcessForm({ initialData }: ProcessFormProps) {
   // ---------------------------------------------------------------------------
   // Hooks & Constants
   // ---------------------------------------------------------------------------
   const router = useRouter();
-  const isUpdate = Boolean(initialData.process_id?.trim());
+  const isUpdate = Boolean(initialData.process_id?.trim() && initialData.process_id !== '');
+
+  // Extract groups list provided by ReadProcess
+  const availableGroups = initialData.groups || [];
 
   // ---------------------------------------------------------------------------
   // State Management
@@ -36,15 +47,13 @@ export default function ProcessForm({ initialData }: ProcessFormProps) {
   const [errors, setErrors] = useState({
     process_id: false,
     description: false,
+    group_id: false,
   });
 
   // ---------------------------------------------------------------------------
   // Logic Handlers
   // ---------------------------------------------------------------------------
 
-  /**
-   * Validates form input and triggers the appropriate database action
-   */
   const handleSave = async () => {
     setSaveStatus(null);
 
@@ -52,11 +61,12 @@ export default function ProcessForm({ initialData }: ProcessFormProps) {
     const newErrors = {
       process_id: !formData.process_id.trim(),
       description: !formData.description.trim(),
+      group_id: !formData.group_id?.trim(),
     };
 
     setErrors(newErrors);
 
-    if (newErrors.process_id || newErrors.description) {
+    if (newErrors.process_id || newErrors.description || newErrors.group_id) {
       setSaveStatus({ design: 'Negative', message: 'Please fix validation errors.' });
       return;
     }
@@ -67,6 +77,7 @@ export default function ProcessForm({ initialData }: ProcessFormProps) {
     if (isUpdate) {
       result = await UpdateProcess(formData.process_id, {
         description: formData.description,
+        group_id: formData.group_id, // Pass group_id to update action
       });
     } else {
       result = await CreateProcess(formData);
@@ -112,15 +123,13 @@ export default function ProcessForm({ initialData }: ProcessFormProps) {
             </>
           }
           endContent={
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <Button
-                design="Emphasized"
-                icon="save"
-                onClick={handleSave}
-              >
-                {isUpdate ? 'Update' : 'Save'}
-              </Button>
-            </div>
+            <Button
+              design="Emphasized"
+              icon="save"
+              onClick={handleSave}
+            >
+              {isUpdate ? 'Update' : 'Save'}
+            </Button>
           }
         />
       }
@@ -151,10 +160,8 @@ export default function ProcessForm({ initialData }: ProcessFormProps) {
         <FormItem labelContent={<Label required>Process</Label>}>
           <Input
             value={formData.process_id}
-            type="Text"
             readonly={isUpdate}
             valueState={errors.process_id ? 'Negative' : 'None'}
-            valueStateMessage={<div>Process ID is required.</div>}
             onInput={(e: any) => {
               setFormData({ ...formData, process_id: e.target.value });
               if (errors.process_id) setErrors({ ...errors, process_id: false });
@@ -162,12 +169,32 @@ export default function ProcessForm({ initialData }: ProcessFormProps) {
           />
         </FormItem>
 
+        {/* Group ID Field (Combo Box) */}
+        <FormItem labelContent={<Label required>Group</Label>}>
+          <ComboBox
+            value={formData.group_id || ''}
+            valueState={errors.group_id ? 'Negative' : 'None'}
+            onSelectionChange={(e: any) => {
+              const selectedId = e.detail.item ? e.detail.item.text : '';
+              setFormData({ ...formData, group_id: selectedId });
+              if (errors.group_id) setErrors({ ...errors, group_id: false });
+            }}
+          >
+            {availableGroups.map((group) => (
+              <ComboBoxItem
+                key={group.group_id}
+                text={group.group_id}
+                additionalText={group.description}
+              />
+            ))}
+          </ComboBox>
+        </FormItem>
+
         {/* Description Field */}
         <FormItem labelContent={<Label required>Description</Label>}>
           <Input
             value={formData.description || ''}
             valueState={errors.description ? 'Negative' : 'None'}
-            valueStateMessage={<div>Description is required.</div>}
             onInput={(e: any) => {
               setFormData({ ...formData, description: e.target.value });
               if (errors.description) setErrors({ ...errors, description: false });
