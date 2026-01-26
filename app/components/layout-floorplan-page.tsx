@@ -14,6 +14,7 @@ import homeIcon from '@ui5/webcomponents-icons/dist/home.js';
 import logoutIcon from '@ui5/webcomponents-icons/dist/log.js';
 import menuIcon from '@ui5/webcomponents-icons/dist/menu.js';
 import processIcon from '@ui5/webcomponents-icons/dist/process.js';
+import groupIcon from '@ui5/webcomponents-icons/dist/group-2.js';
 
 // UI5 Components
 import {
@@ -149,6 +150,12 @@ export default function FloorPlanPage({ children }: { children: React.ReactNode 
               text="Applications"
               icon={applicationIcon}
               selected={pathname.startsWith('/applications')}
+            />
+            <SideNavigationItem
+              id="/groups"
+              text="Groups"
+              icon={groupIcon}
+              selected={pathname.startsWith('/groups')}
             />
           </SideNavigation>
 

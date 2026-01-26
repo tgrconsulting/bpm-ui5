@@ -22,14 +22,14 @@ import {
 } from '@ui5/webcomponents-react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { ApplicationsTable } from './applications-table';
-import { DeleteApplication, ReadApplications, type Application } from './db-actions';
+import { GroupsTable } from './groups-table';
+import { DeleteGroup, ReadGroups, type Group } from './db-actions';
 
 /**
- * ApplicationsPage Component
- * Provides a searchable, paginated list of applications with CRUD capabilities.
+ * GroupsPage Component
+ * Provides a searchable, paginated list of Groups with CRUD capabilities.
  */
-export default function ApplicationsPage() {
+export default function GroupsPage() {
   // ---------------------------------------------------------------------------
   // Hooks & Constants
   // ---------------------------------------------------------------------------
@@ -40,7 +40,7 @@ export default function ApplicationsPage() {
   // ---------------------------------------------------------------------------
   // State Management
   // ---------------------------------------------------------------------------
-  const [data, setData] = useState<Application[]>([]);
+  const [data, setData] = useState<Group[]>([]);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(false);
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
@@ -62,17 +62,17 @@ export default function ApplicationsPage() {
   // ---------------------------------------------------------------------------
 
   /**
-   * Fetches applications from the database
+   * Fetches Groups from the database
    */
   const loadMoreData = async (isInitial = false) => {
     if (loading) return;
     setLoading(true);
 
     const offset = isInitial ? 0 : data.length;
-    const result = await ReadApplications(offset, LIMIT);
+    const result = await ReadGroups(offset, LIMIT);
 
     if (result.success && result.data) {
-      setData((prev) => (isInitial ? result.data!.applications : [...prev, ...result.data!.applications]));
+      setData((prev) => (isInitial ? result.data!.Groups : [...prev, ...result.data!.Groups]));
       setHasMore(result.data.hasMore);
     }
     setLoading(false);
@@ -85,8 +85,7 @@ export default function ApplicationsPage() {
     if (!searchQuery) return data;
     const lowerQuery = searchQuery.toLowerCase();
     return data.filter(
-      (app) =>
-        app.application_id.toLowerCase().includes(lowerQuery) || app.description.toLowerCase().includes(lowerQuery),
+      (app) => app.group_id.toLowerCase().includes(lowerQuery) || app.description.toLowerCase().includes(lowerQuery),
     );
   }, [data, searchQuery]);
 
@@ -99,11 +98,11 @@ export default function ApplicationsPage() {
    */
   const handleClose = async (action: string | undefined) => {
     if (action === MessageBoxAction.OK && pendingDeleteId) {
-      const result = await DeleteApplication(pendingDeleteId);
+      const result = await DeleteGroup(pendingDeleteId);
 
       if (result.success) {
-        setData((prev) => prev.filter((app) => app.application_id !== pendingDeleteId));
-        setStatus({ design: 'Positive', message: `Application ${pendingDeleteId} deleted successfully.` });
+        setData((prev) => prev.filter((app) => app.group_id !== pendingDeleteId));
+        setStatus({ design: 'Positive', message: `Group ${pendingDeleteId} deleted successfully.` });
       } else {
         setStatus({ design: 'Negative', message: result.error || `Failed to delete ${pendingDeleteId}.` });
       }
@@ -124,7 +123,7 @@ export default function ApplicationsPage() {
         onClose={handleClose}
         type="Confirm"
       >
-        Are you sure you want to delete application {pendingDeleteId}?
+        Are you sure you want to delete Group {pendingDeleteId}?
       </MessageBox>
 
       <Page
@@ -134,7 +133,7 @@ export default function ApplicationsPage() {
           <Bar
             design="Header"
             style={{ height: '3.5rem' }}
-            startContent={<Title>Applications</Title>}
+            startContent={<Title>Groups</Title>}
             endContent={
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <Button
@@ -145,7 +144,7 @@ export default function ApplicationsPage() {
                 <Button
                   design="Emphasized"
                   icon={createIcon}
-                  onClick={() => router.push('/applications/new')}
+                  onClick={() => router.push('/groups/new')}
                 >
                   Create
                 </Button>
@@ -198,11 +197,11 @@ export default function ApplicationsPage() {
               display: 'block',
             }}
           >
-            <ApplicationsTable
+            <GroupsTable
               data={filteredData}
               hasMore={searchQuery ? false : hasMore}
               onLoadMore={() => loadMoreData()}
-              onEdit={(id) => router.push(`/applications/${id}`)}
+              onEdit={(id) => router.push(`/Groups/${id}`)}
               onDelete={(id) => setPendingDeleteId(id)}
             />
           </div>

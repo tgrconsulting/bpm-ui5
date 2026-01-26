@@ -14,7 +14,7 @@ import {
   Label,
 } from '@ui5/webcomponents-react';
 import { useMemo, useState } from 'react';
-import { Application } from './db-actions';
+import { Group } from './db-actions';
 
 // =============================================================================
 // Types & Constants
@@ -22,12 +22,12 @@ import { Application } from './db-actions';
 type SortOrder = 'Ascending' | 'Descending' | 'None';
 
 interface SortConfig {
-  column: keyof Application | null;
+  column: keyof Group | null;
   order: SortOrder;
 }
 
-interface ApplicationsTableProps {
-  data: Application[];
+interface GroupsTableProps {
+  data: Group[];
   hasMore: boolean;
   onLoadMore: (event: any) => void;
   onEdit: (id: string) => void;
@@ -35,20 +35,20 @@ interface ApplicationsTableProps {
 }
 
 /**
- * ApplicationsTable Component
- * Displays application data with pre-configured initial sorting.
+ * GroupsTable Component
+ * Displays Group data with pre-configured initial sorting.
  */
-export function ApplicationsTable({ data, hasMore, onLoadMore, onEdit, onDelete }: ApplicationsTableProps) {
+export function GroupsTable({ data, hasMore, onLoadMore, onEdit, onDelete }: GroupsTableProps) {
   // ---------------------------------------------------------------------------
   // State Management
   // ---------------------------------------------------------------------------
 
   /**
-   * INITIALIZATION: Set the default sort to 'applicationid' / 'Ascending'
+   * INITIALIZATION: Set the default sort to 'Groupid' / 'Ascending'
    * This ensures the sort indicator is visible on the first render.
    */
   const [sortConfig, setSortConfig] = useState<SortConfig>({
-    column: 'application_id',
+    column: 'group_id',
     order: 'Ascending',
   });
 
@@ -56,7 +56,7 @@ export function ApplicationsTable({ data, hasMore, onLoadMore, onEdit, onDelete 
   // Logic Handlers
   // ---------------------------------------------------------------------------
 
-  const handleSort = (column: keyof Application) => {
+  const handleSort = (column: keyof Group) => {
     setSortConfig((prev) => {
       // If clicking the same column, toggle between Ascending and Descending
       if (prev.column === column) {
@@ -91,13 +91,13 @@ export function ApplicationsTable({ data, hasMore, onLoadMore, onEdit, onDelete 
       style={{ height: '100%', width: '100%', minWidth: '100%' }}
       headerRow={
         <TableHeaderRow sticky>
-          {/* Application ID Column */}
+          {/* Group ID Column */}
           <TableHeaderCell
             // Dynamically reflects the initial 'Ascending' state
-            sortIndicator={sortConfig.column === 'application_id' ? sortConfig.order : 'None'}
-            onClick={() => handleSort('application_id')}
+            sortIndicator={sortConfig.column === 'group_id' ? sortConfig.order : 'None'}
+            onClick={() => handleSort('group_id')}
           >
-            <Label>Application</Label>
+            <Label>Group</Label>
           </TableHeaderCell>
 
           {/* Description Column */}
@@ -121,24 +121,24 @@ export function ApplicationsTable({ data, hasMore, onLoadMore, onEdit, onDelete 
     >
       {sortedData.map((row) => (
         <TableRow
-          key={row.application_id}
+          key={row.group_id}
           actions={
             <>
               <TableRowAction
                 icon="edit"
                 text="Edit"
-                onClick={() => onEdit(row.application_id)}
+                onClick={() => onEdit(row.group_id)}
               />
               <TableRowAction
                 icon="delete"
                 text="Delete"
-                onClick={() => onDelete(row.application_id)}
+                onClick={() => onDelete(row.group_id)}
               />
             </>
           }
         >
           <TableCell>
-            <Label>{row.application_id}</Label>
+            <Label>{row.group_id}</Label>
           </TableCell>
           <TableCell>
             <Label>{row.description}</Label>
