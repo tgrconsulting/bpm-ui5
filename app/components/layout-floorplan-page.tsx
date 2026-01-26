@@ -140,10 +140,10 @@ export default function FloorPlanPage({ children }: { children: React.ReactNode 
               selected={pathname.startsWith('/dashboard')}
             />
             <SideNavigationItem
-              id="/projects"
-              text="Projects"
+              id="/processes"
+              text="Processes"
               icon={processIcon}
-              selected={pathname.startsWith('/projects')}
+              selected={pathname.startsWith('/processes')}
             />
             <SideNavigationItem
               id="/applications"
