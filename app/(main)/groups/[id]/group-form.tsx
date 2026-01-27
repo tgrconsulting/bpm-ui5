@@ -118,7 +118,7 @@ export default function GroupForm({ initialData }: GroupFormProps) {
                 icon="save"
                 onClick={handleSave}
               >
-                {isUpdate ? 'Update' : 'Save'}
+                Save
               </Button>
             </div>
           }

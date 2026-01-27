@@ -34,7 +34,11 @@ export default function ProcessPage({ initialData }: ProcessPageProps) {
     }
 
     const result: ActionResult = isUpdate
-      ? await UpdateProcess(formData.process_id, { description: formData.description, group_id: formData.group_id })
+      ? await UpdateProcess(formData.process_id, {
+          process_id: formData.process_id,
+          description: formData.description,
+          group_id: formData.group_id,
+        })
       : await CreateProcess(formData);
 
     if (result.success) {
@@ -73,7 +77,7 @@ export default function ProcessPage({ initialData }: ProcessPageProps) {
               icon="save"
               onClick={handleSave}
             >
-              {isUpdate ? 'Update' : 'Save'}
+              Save
             </Button>
           }
         />

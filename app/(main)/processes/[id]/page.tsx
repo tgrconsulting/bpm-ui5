@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
 import { ReadProcess } from '../db-actions';
-import ProcessPage from './process-page';
+import ProcessPage from './process-main-page';
 
 interface PageProps {
   params: Promise<{ id: string }>;
