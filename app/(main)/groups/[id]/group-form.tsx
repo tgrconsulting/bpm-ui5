@@ -143,8 +143,8 @@ export default function GroupForm({ initialData }: GroupFormProps) {
     >
       <Form
         style={{ width: '100%', height: '100%', padding: '1rem' }}
-        labelSpan="S12 M2 L2 XL2"
-        emptySpan="S0 M3 L5 XL6"
+        labelSpan="S12 M2 L2 XL1"
+        emptySpan="S0 M3 L5 XL7"
         layout="S1 M1 L1 XL1"
       >
         {/* Group ID Field */}

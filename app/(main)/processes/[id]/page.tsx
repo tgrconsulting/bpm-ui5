@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
 import { ReadProcess } from '../db-actions';
-import ProcessForm from './process-form';
+import ProcessPage from './process-page';
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -16,5 +16,5 @@ export default async function Page({ params }: PageProps) {
     notFound();
   }
 
-  return <ProcessForm initialData={result.data} />;
+  return <ProcessPage initialData={result.data} />;
 }
