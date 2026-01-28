@@ -3,7 +3,7 @@
 import '@ui5/webcomponents-icons/dist/nav-back.js';
 import '@ui5/webcomponents-icons/dist/save.js';
 import createIcon from '@ui5/webcomponents-icons/dist/create.js';
-import { Bar, Button, Page, Title, MessageStrip } from '@ui5/webcomponents-react';
+import { Bar, Button, Page, Title, MessageStrip, MessageBox, MessageBoxAction } from '@ui5/webcomponents-react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { Process, CreateProcess, UpdateProcess, ActionResult, ProcessItem } from '../db-actions';
@@ -26,6 +26,8 @@ export default function ProcessPage({ initialData }: ProcessPageProps) {
     message: string;
   } | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [editingItem, setEditingItem] = useState<ProcessItem | null>(null);
+  const [pendingDeleteItem, setPendingDeleteItem] = useState<ProcessItem | null>(null);
   const [errors, setErrors] = useState({
     process_id: false,
     description: false,
@@ -33,31 +35,81 @@ export default function ProcessPage({ initialData }: ProcessPageProps) {
   });
 
   /**
-   * Handles saving a new item from the Dialog.
-   * Merges the Omitted data with the current process_id and updates local state.
+   * Handles saving a new or edited item from the Dialog.
+   * For new items: Adds to the processItems array.
+   * For edit: Updates the existing item in the array.
    */
-  const handleItemSave = (newItem: Omit<ProcessItem, 'process_id'>) => {
+  const handleItemSave = (newItem: Omit<ProcessItem, 'process_id'>, isEdit: boolean = false) => {
     setIsDialogOpen(false);
 
-    setFormData((prev) => ({
-      ...prev,
-      processItems: [
-        ...(prev.processItems || []),
-        {
-          ...newItem,
-          process_id: prev.process_id,
-        },
-      ],
-    }));
-
-    setSaveStatus({
-      design: 'Positive',
-      message: `Item: ${newItem.description} added to list. Click Save to persist changes.`,
-    });
+    if (isEdit && editingItem) {
+      // Update existing item
+      setFormData((prev) => ({
+        ...prev,
+        processItems: (prev.processItems || []).map((item) =>
+          item.type === editingItem.type && item.sequence === editingItem.sequence
+            ? { ...item, ...newItem }
+            : item
+        ),
+      }));
+      setEditingItem(null);
+      setSaveStatus({
+        design: 'Positive',
+        message: `Item updated. Click Save to persist changes.`,
+      });
+    } else {
+      // Add new item
+      setFormData((prev) => ({
+        ...prev,
+        processItems: [
+          ...(prev.processItems || []),
+          {
+            ...newItem,
+            process_id: prev.process_id,
+          },
+        ],
+      }));
+      setSaveStatus({
+        design: 'Positive',
+        message: `Item: ${newItem.description} added to list. Click Save to persist changes.`,
+      });
+    }
 
     setTimeout(() => {
       setSaveStatus(null);
     }, 3000);
+  };
+
+  /**
+   * Opens the dialog for editing an item.
+   */
+  const handleEditItem = (item: ProcessItem) => {
+    setEditingItem(item);
+    setIsDialogOpen(true);
+  };
+
+  /**
+   * Confirms deletion of an item with a MessageBox.
+   */
+  const handleConfirmDeleteItem = (action: MessageBoxAction | undefined) => {
+    // Check if action is OK
+    if (action === MessageBoxAction.OK && pendingDeleteItem) {
+      const itemToDelete = pendingDeleteItem;
+      setFormData((prev) => ({
+        ...prev,
+        processItems: (prev.processItems || []).filter(
+          (item) => !(item.type === itemToDelete.type && item.sequence === itemToDelete.sequence)
+        ),
+      }));
+      setSaveStatus({
+        design: 'Positive',
+        message: `Item deleted. Click Save to persist changes.`,
+      });
+      setTimeout(() => {
+        setSaveStatus(null);
+      }, 3000);
+    }
+    setPendingDeleteItem(null);
   };
 
   const handleSave = async () => {
@@ -95,7 +147,18 @@ export default function ProcessPage({ initialData }: ProcessPageProps) {
   };
 
   return (
-    <Page
+    <>
+      <MessageBox
+        open={!!pendingDeleteItem}
+        onClose={(action: any) => {
+          handleConfirmDeleteItem(action);
+        }}
+        type="Confirm"
+      >
+        Are you sure you want to delete this Process Item (Type: {pendingDeleteItem?.type === 1 ? 'Start' : pendingDeleteItem?.type === 2 ? 'Intermediate' : 'End'}, Sequence: {pendingDeleteItem?.sequence})?
+      </MessageBox>
+
+      <Page
       noScrolling={true}
       backgroundDesign="Solid"
       style={{
@@ -158,13 +221,22 @@ export default function ProcessPage({ initialData }: ProcessPageProps) {
         isUpdate={isUpdate}
         availableGroups={initialData.groups || []}
         onTabChange={setActiveTab}
+        onEditItem={handleEditItem}
+        onDeleteItem={(item) => setPendingDeleteItem(item)}
       />
 
       <CreateItemDialog
         open={isDialogOpen}
         onSave={handleItemSave}
-        onCancel={() => setIsDialogOpen(false)}
+        onCancel={() => {
+          setIsDialogOpen(false);
+          setEditingItem(null);
+        }}
+        applications={initialData.applications || []}
+        existingItems={formData.processItems || []}
+        editingItem={editingItem}
       />
     </Page>
+    </>
   );
 }

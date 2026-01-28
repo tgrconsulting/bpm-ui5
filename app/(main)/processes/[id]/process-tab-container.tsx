@@ -6,6 +6,8 @@ import { TabContainer, Tab, Ui5CustomEvent } from '@ui5/webcomponents-react';
 import { ProcessItemsTable } from './processitems-table';
 import { ProcessGeneralForm } from './process-general-form';
 
+import { ProcessItem } from './../db-actions';
+
 interface ProcessTabContainerProps {
   formData: any;
   setFormData: (data: any) => void;
@@ -14,6 +16,8 @@ interface ProcessTabContainerProps {
   isUpdate: boolean;
   availableGroups: any[];
   onTabChange: (tabName: string) => void;
+  onEditItem: (item: ProcessItem) => void;
+  onDeleteItem: (item: ProcessItem) => void;
 }
 
 export function ProcessTabContainer({
@@ -23,7 +27,9 @@ export function ProcessTabContainer({
   setErrors,
   isUpdate,
   availableGroups,
-  onTabChange, // Destructure the new prop
+  onTabChange,
+  onEditItem,
+  onDeleteItem,
 }: ProcessTabContainerProps) {
   // Calculate the item count safely
   const itemCount = formData.processItems?.length ?? 0;
@@ -69,7 +75,11 @@ export function ProcessTabContainer({
         additionalText={itemCount.toString()}
       >
         <div style={{ padding: '1rem' }}>
-          <ProcessItemsTable items={formData.processItems || []} />
+          <ProcessItemsTable 
+            items={formData.processItems || []}
+            onEdit={onEditItem}
+            onDelete={onDeleteItem}
+          />
         </div>
       </Tab>
     </TabContainer>

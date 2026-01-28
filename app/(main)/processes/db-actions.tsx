@@ -3,6 +3,7 @@
 import { query } from '@/lib/db';
 import { revalidatePath } from 'next/cache';
 import { Group } from '../groups/db-actions';
+import { Application } from '../applications/db-actions';
 
 // --- Types ---
 
@@ -12,6 +13,7 @@ export interface Process {
   group_id: string;
   processItems?: ProcessItem[];
   groups?: Group[];
+  applications?: Application[];
 }
 
 export interface ProcessItem {
@@ -19,6 +21,7 @@ export interface ProcessItem {
   type: number;
   sequence: number;
   description: string;
+  application_id: string;
 }
 
 export type ActionResult<T = void> = {
@@ -63,8 +66,11 @@ export async function ReadProcesses(
  */
 export async function ReadProcess(id: string): Promise<ActionResult<Process>> {
   try {
-    const groupsResult = await query('SELECT group_id, description FROM tbl_groups ORDER BY group_id ASC', []);
+    const groupsResult = await query('SELECT * FROM tbl_groups ORDER BY group_id ASC', []);
     const availableGroups = groupsResult.rows as Group[];
+
+    const applicationsResult = await query('SELECT * FROM tbl_applications ORDER BY application_id ASC', []);
+    const availableApplications = applicationsResult.rows as Application[];
 
     if (!id || id === 'new') {
       return {
@@ -75,6 +81,7 @@ export async function ReadProcess(id: string): Promise<ActionResult<Process>> {
           group_id: '',
           processItems: [],
           groups: availableGroups,
+          applications: availableApplications,
         },
       };
     }
@@ -95,6 +102,7 @@ export async function ReadProcess(id: string): Promise<ActionResult<Process>> {
         ...(processResult.rows[0] as Process),
         processItems: itemsResult.rows as ProcessItem[],
         groups: availableGroups,
+        applications: availableApplications,
       },
     };
   } catch (error) {
@@ -129,12 +137,10 @@ export async function CreateProcess(process: Process): Promise<ActionResult> {
 
     if (process.processItems && process.processItems.length > 0) {
       for (const pi of process.processItems) {
-        await query('INSERT INTO tbl_processitems (process_id, type, sequence, description) VALUES ($1, $2, $3, $4)', [
-          process.process_id.trim(),
-          pi.type,
-          pi.sequence,
-          pi.description.trim(),
-        ]);
+        await query(
+          'INSERT INTO tbl_processitems (process_id, type, sequence, description, application_id) VALUES ($1, $2, $3, $4, $5)',
+          [process.process_id.trim(), pi.type, pi.sequence, pi.description.trim(), pi.application_id.trim()],
+        );
       }
     }
 
@@ -174,12 +180,10 @@ export async function UpdateProcess(id: string, process: Process): Promise<Actio
 
     if (process.processItems && process.processItems.length > 0) {
       for (const pi of process.processItems) {
-        await query('INSERT INTO tbl_processitems (process_id, type, sequence, description) VALUES ($1, $2, $3, $4)', [
-          id,
-          pi.type,
-          pi.sequence,
-          pi.description.trim(),
-        ]);
+        await query(
+          'INSERT INTO tbl_processitems (process_id, type, sequence, description, application_id) VALUES ($1, $2, $3, $4, $5)',
+          [id, pi.type, pi.sequence, pi.description.trim(), pi.application_id.trim()],
+        );
       }
     }
 
