@@ -1,16 +1,31 @@
 'use client';
 
+/**
+ * ProcessItemsTable Component
+ *
+ * Renders a read-only list of items associated with a specific process.
+ * Features a sticky header for improved usability in long lists.
+ */
+
 import { Table, TableHeaderRow, TableHeaderCell, TableRow, TableCell, Label } from '@ui5/webcomponents-react';
+import { ProcessItem } from './../db-actions';
 
 interface ProcessItemsTableProps {
-  items: any[];
+  /** Array of process items to display in the table */
+  items: ProcessItem[];
 }
 
 export function ProcessItemsTable({ items }: ProcessItemsTableProps) {
-  // If there are no items, we can show a placeholder or just an empty table
+  // Handle empty state scenarios
   if (!items || items.length === 0) {
     return (
-      <div style={{ padding: '2rem', textAlign: 'center' }}>
+      <div
+        style={{
+          padding: '3rem',
+          textAlign: 'center',
+          backgroundColor: 'var(--sapList_Background)',
+        }}
+      >
         <Label>No items found for this process.</Label>
       </div>
     );
@@ -21,19 +36,25 @@ export function ProcessItemsTable({ items }: ProcessItemsTableProps) {
       style={{ width: '100%' }}
       headerRow={
         <TableHeaderRow sticky>
-          <TableHeaderCell style={{ width: '10rem' }}>
-            <Label>Item No.</Label>
+          <TableHeaderCell>
+            <Label showColon>Type</Label>
           </TableHeaderCell>
           <TableHeaderCell>
-            <Label>Description</Label>
+            <Label showColon>Sequence</Label>
+          </TableHeaderCell>
+          <TableHeaderCell>
+            <Label showColon>Description</Label>
           </TableHeaderCell>
         </TableHeaderRow>
       }
     >
-      {items.map((item: any) => (
-        <TableRow key={`${item.process_id}-${item.item}`}>
+      {items.map((item) => (
+        <TableRow key={`${item.process_id}-(${item.type})-${item.sequence}`}>
           <TableCell>
-            <Label>{item.item}</Label>
+            <Label>{item.type}</Label>
+          </TableCell>
+          <TableCell>
+            <Label>{item.sequence}</Label>
           </TableCell>
           <TableCell>
             <Label>{item.description}</Label>

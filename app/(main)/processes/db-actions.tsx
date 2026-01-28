@@ -16,7 +16,8 @@ export interface Process {
 
 export interface ProcessItem {
   process_id: string;
-  item: number;
+  type: number;
+  sequence: number;
   description: string;
 }
 
@@ -83,7 +84,10 @@ export async function ReadProcess(id: string): Promise<ActionResult<Process>> {
       return { success: false, error: 'Process not found.' };
     }
 
-    const itemsResult = await query('SELECT * FROM tbl_processitems WHERE process_id = $1 ORDER BY item ASC', [id]);
+    const itemsResult = await query(
+      'SELECT * FROM tbl_processitems WHERE process_id = $1 ORDER BY type ASC, sequence ASC',
+      [id],
+    );
 
     return {
       success: true,
@@ -125,9 +129,10 @@ export async function CreateProcess(process: Process): Promise<ActionResult> {
 
     if (process.processItems && process.processItems.length > 0) {
       for (const pi of process.processItems) {
-        await query('INSERT INTO tbl_processitems (process_id, item, description) VALUES ($1, $2, $3)', [
+        await query('INSERT INTO tbl_processitems (process_id, type, sequence, description) VALUES ($1, $2, $3, $4)', [
           process.process_id.trim(),
-          pi.item,
+          pi.type,
+          pi.sequence,
           pi.description.trim(),
         ]);
       }
@@ -169,9 +174,10 @@ export async function UpdateProcess(id: string, process: Process): Promise<Actio
 
     if (process.processItems && process.processItems.length > 0) {
       for (const pi of process.processItems) {
-        await query('INSERT INTO tbl_processitems (process_id, item, description) VALUES ($1, $2, $3)', [
+        await query('INSERT INTO tbl_processitems (process_id, type, sequence, description) VALUES ($1, $2, $3, $4)', [
           id,
-          pi.item,
+          pi.type,
+          pi.sequence,
           pi.description.trim(),
         ]);
       }

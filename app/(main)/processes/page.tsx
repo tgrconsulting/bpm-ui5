@@ -1,14 +1,15 @@
 'use client';
 
-// =============================================================================
-// Imports
-// =============================================================================
+/**
+ * Process List Page
+ *
+ * Provides a searchable, paginated overview of all processes.
+ * Supports asynchronous data loading, filtering, and deletion workflows.
+ */
+
 import { TABLE_ROW_LIMIT } from '@/lib/constants';
 import createIcon from '@ui5/webcomponents-icons/dist/create.js';
-import '@ui5/webcomponents-icons/dist/delete.js';
-import '@ui5/webcomponents-icons/dist/edit.js';
 import refreshIcon from '@ui5/webcomponents-icons/dist/refresh.js';
-import '@ui5/webcomponents-icons/dist/search.js';
 import {
   Bar,
   BusyIndicator,
@@ -25,21 +26,11 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { ProcessesTable } from './processes-table';
 import { DeleteProcess, ReadProcesses, type Process } from './db-actions';
 
-/**
- * ProcessPage Component
- * Provides a searchable, paginated list of Process with CRUD capabilities.
- */
 export default function ProcessPage() {
-  // ---------------------------------------------------------------------------
-  // Hooks & Constants
-  // ---------------------------------------------------------------------------
-  const LIMIT = TABLE_ROW_LIMIT;
-  const initialFetched = useRef(false);
   const router = useRouter();
+  const initialFetched = useRef(false);
 
-  // ---------------------------------------------------------------------------
-  // State Management
-  // ---------------------------------------------------------------------------
+  // -- State Management --
   const [data, setData] = useState<Process[]>([]);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(false);
@@ -47,29 +38,24 @@ export default function ProcessPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [status, setStatus] = useState<{ design: 'Positive' | 'Negative'; message: string } | null>(null);
 
-  // ---------------------------------------------------------------------------
-  // Side Effects
-  // ---------------------------------------------------------------------------
+  // -- Data Fetching --
   useEffect(() => {
     if (!initialFetched.current) {
       initialFetched.current = true;
-      loadMoreData(true);
+      loadData(true);
     }
   }, []);
 
-  // ---------------------------------------------------------------------------
-  // Data Handlers
-  // ---------------------------------------------------------------------------
-
   /**
-   * Fetches Process from the database
+   * Fetches process records from the database.
+   * @param isInitial - If true, resets the list; otherwise appends data.
    */
-  const loadMoreData = async (isInitial = false) => {
+  const loadData = async (isInitial = false) => {
     if (loading) return;
     setLoading(true);
 
     const offset = isInitial ? 0 : data.length;
-    const result = await ReadProcesses(offset, LIMIT);
+    const result = await ReadProcesses(offset, TABLE_ROW_LIMIT);
 
     if (result.success && result.data) {
       setData((prev) => (isInitial ? result.data!.Process : [...prev, ...result.data!.Process]));
@@ -79,48 +65,43 @@ export default function ProcessPage() {
   };
 
   /**
-   * Memoized filter logic for client-side search
+   * Memoized filtration to ensure high performance during search input.
    */
   const filteredData = useMemo(() => {
-    if (!searchQuery) return data;
-    const lowerQuery = searchQuery.toLowerCase();
+    const query = searchQuery.trim().toLowerCase();
+    if (!query) return data;
+
     return data.filter(
-      (app) => app.process_id.toLowerCase().includes(lowerQuery) || app.description.toLowerCase().includes(lowerQuery),
+      (item) => item.process_id.toLowerCase().includes(query) || item.description.toLowerCase().includes(query),
     );
   }, [data, searchQuery]);
 
-  // ---------------------------------------------------------------------------
-  // Action Handlers
-  // ---------------------------------------------------------------------------
+  // -- Event Handlers --
 
   /**
-   * Handles the deletion confirmation flow and status feedback
+   * Orchestrates the deletion confirmation and feedback loop.
    */
-  const handleClose = async (action: string | undefined) => {
+  const handleConfirmDelete = async (action: MessageBoxAction | undefined) => {
     if (action === MessageBoxAction.OK && pendingDeleteId) {
       const result = await DeleteProcess(pendingDeleteId);
 
       if (result.success) {
-        setData((prev) => prev.filter((app) => app.process_id !== pendingDeleteId));
+        setData((prev) => prev.filter((item) => item.process_id !== pendingDeleteId));
         setStatus({ design: 'Positive', message: `Process ${pendingDeleteId} deleted successfully.` });
       } else {
         setStatus({ design: 'Negative', message: result.error || `Failed to delete ${pendingDeleteId}.` });
       }
 
-      // Auto-clear status after 5 seconds
       setTimeout(() => setStatus(null), 5000);
     }
     setPendingDeleteId(null);
   };
 
-  // =============================================================================
-  // Main Render
-  // =============================================================================
   return (
     <>
       <MessageBox
         open={!!pendingDeleteId}
-        onClose={handleClose}
+        onClose={(e) => handleConfirmDelete(e.detail.action)}
         type="Confirm"
       >
         Are you sure you want to delete Process {pendingDeleteId}?
@@ -138,7 +119,7 @@ export default function ProcessPage() {
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <Button
                   icon={refreshIcon}
-                  onClick={() => loadMoreData(true)}
+                  onClick={() => loadData(true)}
                   tooltip="Refresh List"
                 />
                 <Button
@@ -155,8 +136,7 @@ export default function ProcessPage() {
               placeholder="Search ID or Description..."
               showClearIcon
               style={{ width: '100%', maxWidth: '400px' }}
-              onInput={(e: any) => setSearchQuery(e.target.value)}
-              onSearch={(e: any) => setSearchQuery(e.target.value)}
+              onInput={(e) => setSearchQuery(e.target.value)}
             />
           </Bar>
         }
@@ -179,32 +159,16 @@ export default function ProcessPage() {
       >
         <BusyIndicator
           active={loading}
-          delay={1000}
-          style={{
-            width: '100%',
-            height: '100%',
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'flex-start',
-          }}
+          delay={500}
+          style={{ width: '100%', height: '100%' }}
         >
-          <div
-            style={{
-              width: '100%',
-              height: '100%',
-              flex: 1,
-              alignSelf: 'stretch',
-              display: 'block',
-            }}
-          >
-            <ProcessesTable
-              data={filteredData}
-              hasMore={searchQuery ? false : hasMore}
-              onLoadMore={() => loadMoreData()}
-              onEdit={(id) => router.push(`/processes/${id}`)}
-              onDelete={(id) => setPendingDeleteId(id)}
-            />
-          </div>
+          <ProcessesTable
+            data={filteredData}
+            hasMore={searchQuery ? false : hasMore}
+            onLoadMore={() => loadData()}
+            onEdit={(id) => router.push(`/processes/${id}`)}
+            onDelete={(id) => setPendingDeleteId(id)}
+          />
         </BusyIndicator>
       </Page>
     </>
