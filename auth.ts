@@ -4,7 +4,12 @@ import Google from "next-auth/providers/google"
 import { query } from "@/lib/db"
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
-    providers: [Google],
+    providers: [
+        Google({
+            clientId: process.env.AUTH_GOOGLE_ID,
+            clientSecret: process.env.AUTH_GOOGLE_SECRET,
+        })
+    ],
     callbacks: {
         async signIn({ user }) {
             console.log("SignIn Callback Invoked for user:", user?.email);
