@@ -101,7 +101,7 @@ export default function ProcessPage() {
     <>
       <MessageBox
         open={!!pendingDeleteId}
-        onClose={(e) => handleConfirmDelete(e.detail.action)}
+        onClose={(e) => handleConfirmDelete(e?.detail?.action)}
         type="Confirm"
       >
         Are you sure you want to delete Process {pendingDeleteId}?
