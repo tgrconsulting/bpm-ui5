@@ -12,7 +12,7 @@ export default async function Page({ params }: PageProps) {
   let application: Application | null = null;
 
   if (id === 'new') {
-    application = { applicationid: '', description: '' };
+    application = { application_id: '', description: '' };
   } else {
     const result = await ReadApplication(id);
 
