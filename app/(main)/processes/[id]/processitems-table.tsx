@@ -7,13 +7,21 @@
 
 import editIcon from '@ui5/webcomponents-icons/dist/edit.js';
 import deleteIcon from '@ui5/webcomponents-icons/dist/delete.js';
-import { Table, TableHeaderRow, TableHeaderCell, TableRow, TableCell, Label, TableRowAction } from '@ui5/webcomponents-react';
-import { ProcessItem } from './../db-actions';
+import {
+  Table,
+  TableHeaderRow,
+  TableHeaderCell,
+  TableRow,
+  TableCell,
+  Label,
+  TableRowAction,
+} from '@ui5/webcomponents-react';
+import { ProcessEvent } from './../db-actions';
 
 interface ProcessItemsTableProps {
-  items: ProcessItem[];
-  onEdit: (item: ProcessItem) => void;
-  onDelete: (item: ProcessItem) => void;
+  items: ProcessEvent[];
+  onEdit: (item: ProcessEvent) => void;
+  onDelete: (item: ProcessEvent) => void;
 }
 
 // Mapping object for Item Types

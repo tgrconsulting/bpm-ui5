@@ -1,33 +1,41 @@
 'use client';
 
-// =============================================================================
+// ============================================================================
 // Imports
-// =============================================================================
-import '@ui5/webcomponents-icons/dist/nav-back.js';
-import '@ui5/webcomponents-icons/dist/save.js';
+// ============================================================================
+
+import navBackIcon from '@ui5/webcomponents-icons/dist/nav-back.js';
+import saveIcon from '@ui5/webcomponents-icons/dist/save.js';
 import { Bar, Button, Form, FormItem, Input, Label, Page, Title, MessageStrip } from '@ui5/webcomponents-react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+
 import { Application, CreateApplication, UpdateApplication, ActionResult } from './../db-actions';
+
+// ============================================================================
+// Types
+// ============================================================================
 
 interface ApplicationFormProps {
   initialData: Application;
 }
 
-/**
- * ApplicationForm Component
- * Handles both the creation of new applications and editing existing ones.
- */
+// ============================================================================
+// Component
+// ============================================================================
+
 export default function ApplicationForm({ initialData }: ApplicationFormProps) {
-  // ---------------------------------------------------------------------------
-  // Hooks & Constants
-  // ---------------------------------------------------------------------------
+  // --------------------------------------------------------------------------
+  // Hooks & Setup
+  // --------------------------------------------------------------------------
+
   const router = useRouter();
   const isUpdate = Boolean(initialData.application_id?.trim());
 
-  // ---------------------------------------------------------------------------
+  // --------------------------------------------------------------------------
   // State Management
-  // ---------------------------------------------------------------------------
+  // --------------------------------------------------------------------------
+
   const [formData, setFormData] = useState<Application>(initialData);
   const [saveStatus, setSaveStatus] = useState<{
     design: 'Positive' | 'Negative';
@@ -38,12 +46,15 @@ export default function ApplicationForm({ initialData }: ApplicationFormProps) {
     description: false,
   });
 
-  // ---------------------------------------------------------------------------
-  // Logic Handlers
-  // ---------------------------------------------------------------------------
+  // --------------------------------------------------------------------------
+  // Event Handlers
+  // --------------------------------------------------------------------------
 
   /**
-   * Validates form input and triggers the appropriate database action
+   * Validates form input and triggers the appropriate database action.
+   * Shows success/error feedback in status bar and refreshes page on success.
+   *
+   * @returns {Promise<void>}
    */
   const handleSave = async () => {
     setSaveStatus(null);
@@ -90,9 +101,32 @@ export default function ApplicationForm({ initialData }: ApplicationFormProps) {
     }
   };
 
-  // =============================================================================
-  // Main Render
-  // =============================================================================
+  /**
+   * Handles application ID input changes.
+   *
+   * @param {any} e - The input event
+   * @returns {void}
+   */
+  const handleApplicationIdChange = (e: any) => {
+    setFormData({ ...formData, application_id: e.target.value });
+    if (errors.application_id) setErrors({ ...errors, application_id: false });
+  };
+
+  /**
+   * Handles description input changes.
+   *
+   * @param {any} e - The input event
+   * @returns {void}
+   */
+  const handleDescriptionChange = (e: any) => {
+    setFormData({ ...formData, description: e.target.value });
+    if (errors.description) setErrors({ ...errors, description: false });
+  };
+
+  // --------------------------------------------------------------------------
+  // Render
+  // --------------------------------------------------------------------------
+
   return (
     <Page
       noScrolling={true}
@@ -104,7 +138,7 @@ export default function ApplicationForm({ initialData }: ApplicationFormProps) {
           startContent={
             <>
               <Button
-                icon="nav-back"
+                icon={navBackIcon}
                 design="Default"
                 onClick={() => router.back()}
               />
@@ -115,7 +149,7 @@ export default function ApplicationForm({ initialData }: ApplicationFormProps) {
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <Button
                 design="Emphasized"
-                icon="save"
+                icon={saveIcon}
                 onClick={handleSave}
               >
                 Save
@@ -155,10 +189,7 @@ export default function ApplicationForm({ initialData }: ApplicationFormProps) {
             readonly={isUpdate}
             valueState={errors.application_id ? 'Negative' : 'None'}
             valueStateMessage={<div>Application ID is required.</div>}
-            onInput={(e: any) => {
-              setFormData({ ...formData, application_id: e.target.value });
-              if (errors.application_id) setErrors({ ...errors, application_id: false });
-            }}
+            onInput={handleApplicationIdChange}
           />
         </FormItem>
 
@@ -168,10 +199,7 @@ export default function ApplicationForm({ initialData }: ApplicationFormProps) {
             value={formData.description || ''}
             valueState={errors.description ? 'Negative' : 'None'}
             valueStateMessage={<div>Description is required.</div>}
-            onInput={(e: any) => {
-              setFormData({ ...formData, description: e.target.value });
-              if (errors.description) setErrors({ ...errors, description: false });
-            }}
+            onInput={handleDescriptionChange}
           />
         </FormItem>
       </Form>

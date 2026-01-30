@@ -1,22 +1,54 @@
 'use client';
 
+// ============================================================================
+// Imports
+// ============================================================================
+
 import { Dialog, Button, Form, FormItem, Input, Bar, Label, Select, Option } from '@ui5/webcomponents-react';
 import { useState, useEffect } from 'react';
-// Import the interface from your db-actions file
-import { ProcessItem } from './../db-actions';
-import { Application } from '../applications/db-actions';
+
+import { ProcessEvent } from '../db-actions';
+import { Application } from '../../applications/db-actions';
+
+// ============================================================================
+// Types
+// ============================================================================
 
 interface CreateItemDialogProps {
   open: boolean;
-  /** Pass the item data back without process_id as it is handled by the parent */
-  onSave: (data: Omit<ProcessItem, 'process_id'>, isEdit?: boolean) => void;
+  onSave: (data: Omit<ProcessEvent, 'process_id'>, isEdit?: boolean) => void;
   onCancel: () => void;
   applications?: Application[];
-  existingItems?: ProcessItem[];
-  editingItem?: ProcessItem | null;
+  existingItems?: ProcessEvent[];
+  editingItem?: ProcessEvent | null;
 }
 
-export function CreateItemDialog({ open, onSave, onCancel, applications = [], existingItems = [], editingItem = null }: CreateItemDialogProps) {
+// ============================================================================
+// Constants
+// ============================================================================
+
+const TYPE_MAP: Record<number, string> = {
+  1: 'Start',
+  2: 'Intermediate',
+  3: 'End',
+};
+
+// ============================================================================
+// Component
+// ============================================================================
+
+export function CreateItemDialog({
+  open,
+  onSave,
+  onCancel,
+  applications = [],
+  existingItems = [],
+  editingItem = null,
+}: CreateItemDialogProps) {
+  // --------------------------------------------------------------------------
+  // State Management
+  // --------------------------------------------------------------------------
+
   const [type, setType] = useState<number>(1);
   const [sequence, setSequence] = useState('');
   const [description, setDescription] = useState('');
@@ -26,17 +58,22 @@ export function CreateItemDialog({ open, onSave, onCancel, applications = [], ex
   const [applicationError, setApplicationError] = useState(false);
   const [duplicateError, setDuplicateError] = useState<string | null>(null);
 
-  // Reset form when dialog opens
+  // --------------------------------------------------------------------------
+  // Effects
+  // --------------------------------------------------------------------------
+
+  /**
+   * Reset and populate form based on dialog state.
+   * If editing, populates with existing event data. Otherwise resets.
+   */
   useEffect(() => {
     if (open) {
       if (editingItem) {
-        // Load item data for editing
         setType(editingItem.type);
         setSequence(editingItem.sequence.toString());
         setDescription(editingItem.description);
         setApplicationId(editingItem.application_id);
       } else {
-        // Reset form for new item
         setType(1);
         setSequence('');
         setDescription('');
@@ -49,6 +86,16 @@ export function CreateItemDialog({ open, onSave, onCancel, applications = [], ex
     }
   }, [open, editingItem]);
 
+  // --------------------------------------------------------------------------
+  // Event Handlers
+  // --------------------------------------------------------------------------
+
+  /**
+   * Validates and saves the event data.
+   * Checks for duplicate type/sequence combinations before saving.
+   *
+   * @returns {void}
+   */
   const handleSave = () => {
     const seqNumber = parseInt(sequence);
     let hasErrors = false;
@@ -81,28 +128,39 @@ export function CreateItemDialog({ open, onSave, onCancel, applications = [], ex
       return;
     }
 
-    // Check if the (type, sequence) combination already exists (skip if editing the same item)
+    // Check for duplicate (type, sequence) combination
     const isDuplicate = existingItems.some(
-      (item) => item.type === type && item.sequence === seqNumber && 
-      !(editingItem && editingItem.type === type && editingItem.sequence === seqNumber)
+      (item) =>
+        item.type === type &&
+        item.sequence === seqNumber &&
+        !(editingItem && editingItem.type === type && editingItem.sequence === seqNumber),
     );
 
     if (isDuplicate) {
-      setDuplicateError(`An item with Type "${type === 1 ? 'Start' : type === 2 ? 'Intermediate' : 'End'}" and Sequence "${seqNumber}" already exists.`);
+      setDuplicateError(
+        `An event with Type "${TYPE_MAP[type]}" and Sequence "${seqNumber}" already exists.`,
+      );
       return;
     }
 
-    // Using the interface structure
-    onSave({
-      type,
-      sequence: seqNumber,
-      description: description.trim(),
-      application_id: applicationId.trim(),
-    }, !!editingItem);
+    onSave(
+      {
+        type,
+        sequence: seqNumber,
+        description: description.trim(),
+        application_id: applicationId.trim(),
+      },
+      !!editingItem,
+    );
 
     resetForm();
   };
 
+  /**
+   * Resets all form state to initial values.
+   *
+   * @returns {void}
+   */
   const resetForm = () => {
     setType(1);
     setSequence('');
@@ -114,15 +172,24 @@ export function CreateItemDialog({ open, onSave, onCancel, applications = [], ex
     setDuplicateError(null);
   };
 
+  /**
+   * Cancels the dialog and resets form state.
+   *
+   * @returns {void}
+   */
   const handleCancel = () => {
     resetForm();
     onCancel();
   };
 
+  // --------------------------------------------------------------------------
+  // Render
+  // --------------------------------------------------------------------------
+
   return (
     <Dialog
       open={open}
-      headerText={editingItem ? 'Edit Process Item' : 'Create New Process Item'}
+      headerText={editingItem ? 'Edit Process Event' : 'Create New Process Event'}
       footer={
         <Bar
           design="Footer"
@@ -198,7 +265,10 @@ export function CreateItemDialog({ open, onSave, onCancel, applications = [], ex
               if (applicationError) setApplicationError(false);
             }}
           >
-            <Option data-id="" selected={!applicationId}>
+            <Option
+              data-id=""
+              selected={!applicationId}
+            >
               -- Select Application --
             </Option>
             {applications.map((app) => (
@@ -215,9 +285,7 @@ export function CreateItemDialog({ open, onSave, onCancel, applications = [], ex
 
         {duplicateError && (
           <FormItem>
-            <div style={{ color: '#d32f2f', fontWeight: 500, marginTop: '0.5rem' }}>
-              {duplicateError}
-            </div>
+            <div style={{ color: '#d32f2f', fontWeight: 500, marginTop: '0.5rem' }}>{duplicateError}</div>
           </FormItem>
         )}
       </Form>

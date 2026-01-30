@@ -1,6 +1,14 @@
 'use client';
 
+// ============================================================================
+// Imports
+// ============================================================================
+
 import { Form, FormItem, Input, Label, ComboBox, ComboBoxItem } from '@ui5/webcomponents-react';
+
+// ============================================================================
+// Types
+// ============================================================================
 
 interface ProcessGeneralFormProps {
   formData: any;
@@ -11,6 +19,10 @@ interface ProcessGeneralFormProps {
   availableGroups: any[];
 }
 
+// ============================================================================
+// Component
+// ============================================================================
+
 export function ProcessGeneralForm({
   formData,
   setFormData,
@@ -19,6 +31,48 @@ export function ProcessGeneralForm({
   isUpdate,
   availableGroups,
 }: ProcessGeneralFormProps) {
+  // --------------------------------------------------------------------------
+  // Event Handlers
+  // --------------------------------------------------------------------------
+
+  /**
+   * Handles group selection from ComboBox.
+   *
+   * @param {any} e - The selection change event
+   * @returns {void}
+   */
+  const handleGroupChange = (e: any) => {
+    const selectedId = e.detail.item ? e.detail.item.text : '';
+    setFormData({ ...formData, group_id: selectedId });
+    if (errors.group_id) setErrors({ ...errors, group_id: false });
+  };
+
+  /**
+   * Handles process ID input changes.
+   *
+   * @param {any} e - The input event
+   * @returns {void}
+   */
+  const handleProcessIdChange = (e: any) => {
+    setFormData({ ...formData, process_id: e.target.value });
+    if (errors.process_id) setErrors({ ...errors, process_id: false });
+  };
+
+  /**
+   * Handles description input changes.
+   *
+   * @param {any} e - The input event
+   * @returns {void}
+   */
+  const handleDescriptionChange = (e: any) => {
+    setFormData({ ...formData, description: e.target.value });
+    if (errors.description) setErrors({ ...errors, description: false });
+  };
+
+  // --------------------------------------------------------------------------
+  // Render
+  // --------------------------------------------------------------------------
+
   return (
     <div style={{ padding: '1rem', width: '100%', boxSizing: 'border-box', overflowX: 'hidden' }}>
       <Form
@@ -32,10 +86,7 @@ export function ProcessGeneralForm({
             value={formData.process_id}
             readonly={isUpdate}
             valueState={errors.process_id ? 'Negative' : 'None'}
-            onInput={(e: any) => {
-              setFormData({ ...formData, process_id: e.target.value });
-              if (errors.process_id) setErrors({ ...errors, process_id: false });
-            }}
+            onInput={handleProcessIdChange}
           />
         </FormItem>
 
@@ -43,11 +94,7 @@ export function ProcessGeneralForm({
           <ComboBox
             value={formData.group_id || ''}
             valueState={errors.group_id ? 'Negative' : 'None'}
-            onSelectionChange={(e: any) => {
-              const selectedId = e.detail.item ? e.detail.item.text : '';
-              setFormData({ ...formData, group_id: selectedId });
-              if (errors.group_id) setErrors({ ...errors, group_id: false });
-            }}
+            onSelectionChange={handleGroupChange}
           >
             {availableGroups.map((group) => (
               <ComboBoxItem
@@ -63,10 +110,7 @@ export function ProcessGeneralForm({
           <Input
             value={formData.description || ''}
             valueState={errors.description ? 'Negative' : 'None'}
-            onInput={(e: any) => {
-              setFormData({ ...formData, description: e.target.value });
-              if (errors.description) setErrors({ ...errors, description: false });
-            }}
+            onInput={handleDescriptionChange}
           />
         </FormItem>
       </Form>

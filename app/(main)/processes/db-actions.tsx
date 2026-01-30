@@ -11,12 +11,12 @@ export interface Process {
   process_id: string;
   description: string;
   group_id: string;
-  processItems?: ProcessItem[];
+  processItems?: ProcessEvent[];
   groups?: Group[];
   applications?: Application[];
 }
 
-export interface ProcessItem {
+export interface ProcessEvent {
   process_id: string;
   type: number;
   sequence: number;
@@ -92,7 +92,7 @@ export async function ReadProcess(id: string): Promise<ActionResult<Process>> {
     }
 
     const itemsResult = await query(
-      'SELECT * FROM tbl_processitems WHERE process_id = $1 ORDER BY type ASC, sequence ASC',
+      'SELECT * FROM tbl_processevents WHERE process_id = $1 ORDER BY type ASC, sequence ASC',
       [id],
     );
 
@@ -100,7 +100,7 @@ export async function ReadProcess(id: string): Promise<ActionResult<Process>> {
       success: true,
       data: {
         ...(processResult.rows[0] as Process),
-        processItems: itemsResult.rows as ProcessItem[],
+        processItems: itemsResult.rows as ProcessEvent[],
         groups: availableGroups,
         applications: availableApplications,
       },
@@ -138,7 +138,7 @@ export async function CreateProcess(process: Process): Promise<ActionResult> {
     if (process.processItems && process.processItems.length > 0) {
       for (const pi of process.processItems) {
         await query(
-          'INSERT INTO tbl_processitems (process_id, type, sequence, description, application_id) VALUES ($1, $2, $3, $4, $5)',
+          'INSERT INTO tbl_processevents (process_id, type, sequence, description, application_id) VALUES ($1, $2, $3, $4, $5)',
           [process.process_id.trim(), pi.type, pi.sequence, pi.description.trim(), pi.application_id.trim()],
         );
       }
@@ -176,12 +176,12 @@ export async function UpdateProcess(id: string, process: Process): Promise<Actio
     }
 
     // 2. Refresh items: Delete existing and re-insert new ones
-    await query('DELETE FROM tbl_processitems WHERE process_id = $1', [id]);
+    await query('DELETE FROM tbl_processevents WHERE process_id = $1', [id]);
 
     if (process.processItems && process.processItems.length > 0) {
       for (const pi of process.processItems) {
         await query(
-          'INSERT INTO tbl_processitems (process_id, type, sequence, description, application_id) VALUES ($1, $2, $3, $4, $5)',
+          'INSERT INTO tbl_processevents (process_id, type, sequence, description, application_id) VALUES ($1, $2, $3, $4, $5)',
           [id, pi.type, pi.sequence, pi.description.trim(), pi.application_id.trim()],
         );
       }
@@ -204,7 +204,7 @@ export async function UpdateProcess(id: string, process: Process): Promise<Actio
 export async function DeleteProcess(id: string): Promise<ActionResult> {
   try {
     await query('BEGIN', []);
-    await query('DELETE FROM tbl_processitems WHERE process_id = $1', [id]);
+    await query('DELETE FROM tbl_processevents WHERE process_id = $1', [id]);
     const result = await query('DELETE FROM tbl_processes WHERE process_id = $1 RETURNING process_id', [id]);
 
     if (result.rowCount === 0) {

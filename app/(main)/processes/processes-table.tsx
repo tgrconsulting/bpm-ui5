@@ -1,8 +1,11 @@
 'use client';
 
-// =============================================================================
+// ============================================================================
 // Imports
-// =============================================================================
+// ============================================================================
+
+import editIcon from '@ui5/webcomponents-icons/dist/edit.js';
+import deleteIcon from '@ui5/webcomponents-icons/dist/delete.js';
 import {
   Table,
   TableRow,
@@ -14,11 +17,13 @@ import {
   Label,
 } from '@ui5/webcomponents-react';
 import { useMemo, useState } from 'react';
+
 import { Process } from './db-actions';
 
-// =============================================================================
-// Types & Constants
-// =============================================================================
+// ============================================================================
+// Types
+// ============================================================================
+
 type SortOrder = 'Ascending' | 'Descending' | 'None';
 
 interface SortConfig {
@@ -26,7 +31,7 @@ interface SortConfig {
   order: SortOrder;
 }
 
-interface ProcesssTableProps {
+interface ProcessesTableProps {
   data: Process[];
   hasMore: boolean;
   onLoadMore: (event: any) => void;
@@ -34,42 +39,53 @@ interface ProcesssTableProps {
   onDelete: (id: string) => void;
 }
 
-/**
- * ProcesssTable Component
- * Displays Process data with pre-configured initial sorting.
- */
-export function ProcessesTable({ data, hasMore, onLoadMore, onEdit, onDelete }: ProcesssTableProps) {
-  // ---------------------------------------------------------------------------
+// ============================================================================
+// Component
+// ============================================================================
+
+export function ProcessesTable({ data, hasMore, onLoadMore, onEdit, onDelete }: ProcessesTableProps) {
+  // --------------------------------------------------------------------------
   // State Management
-  // ---------------------------------------------------------------------------
+  // --------------------------------------------------------------------------
 
   /**
-   * INITIALIZATION: Set the default sort to 'Processid' / 'Ascending'
-   * This ensures the sort indicator is visible on the first render.
+   * Sorting configuration with initial sort on process_id ascending.
    */
   const [sortConfig, setSortConfig] = useState<SortConfig>({
     column: 'process_id',
     order: 'Ascending',
   });
 
-  // ---------------------------------------------------------------------------
-  // Logic Handlers
-  // ---------------------------------------------------------------------------
+  // --------------------------------------------------------------------------
+  // Event Handlers
+  // --------------------------------------------------------------------------
 
+  /**
+   * Handles sorting for a given column.
+   * Toggles between Ascending/Descending for same column, defaults to Ascending for new columns.
+   *
+   * @param {keyof Process} column - The column to sort by
+   * @returns {void}
+   */
   const handleSort = (column: keyof Process) => {
     setSortConfig((prev) => {
-      // If clicking the same column, toggle between Ascending and Descending
       if (prev.column === column) {
         return {
           column,
           order: prev.order === 'Ascending' ? 'Descending' : 'Ascending',
         };
       }
-      // If clicking a new column, default to Ascending
       return { column, order: 'Ascending' };
     });
   };
 
+  // --------------------------------------------------------------------------
+  // Computed Values
+  // --------------------------------------------------------------------------
+
+  /**
+   * Sorts the data based on current sort configuration.
+   */
   const sortedData = useMemo(() => {
     if (!sortConfig.column || sortConfig.order === 'None') return data;
 
@@ -83,9 +99,10 @@ export function ProcessesTable({ data, hasMore, onLoadMore, onEdit, onDelete }: 
     });
   }, [data, sortConfig]);
 
-  // =============================================================================
-  // Main Render
-  // =============================================================================
+  // --------------------------------------------------------------------------
+  // Render
+  // --------------------------------------------------------------------------
+
   return (
     <Table
       style={{ height: '100%', width: '100%', minWidth: '100%' }}
@@ -93,7 +110,6 @@ export function ProcessesTable({ data, hasMore, onLoadMore, onEdit, onDelete }: 
         <TableHeaderRow sticky>
           {/* Process ID Column */}
           <TableHeaderCell
-            // Dynamically reflects the initial 'Ascending' state
             sortIndicator={sortConfig.column === 'process_id' ? sortConfig.order : 'None'}
             onClick={() => handleSort('process_id')}
           >
@@ -133,12 +149,12 @@ export function ProcessesTable({ data, hasMore, onLoadMore, onEdit, onDelete }: 
           actions={
             <>
               <TableRowAction
-                icon="edit"
+                icon={editIcon}
                 text="Edit"
                 onClick={() => onEdit(row.process_id)}
               />
               <TableRowAction
-                icon="delete"
+                icon={deleteIcon}
                 text="Delete"
                 onClick={() => onDelete(row.process_id)}
               />
