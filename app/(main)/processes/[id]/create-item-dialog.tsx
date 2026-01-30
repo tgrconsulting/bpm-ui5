@@ -137,9 +137,7 @@ export function CreateItemDialog({
     );
 
     if (isDuplicate) {
-      setDuplicateError(
-        `An event with Type "${TYPE_MAP[type]}" and Sequence "${seqNumber}" already exists.`,
-      );
+      setDuplicateError(`An event with Type "${TYPE_MAP[type]}" and Sequence "${seqNumber}" already exists.`);
       return;
     }
 

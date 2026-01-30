@@ -7,25 +7,11 @@
 import '@ui5/webcomponents-icons/dist/nav-back.js';
 import '@ui5/webcomponents-icons/dist/save.js';
 import createIcon from '@ui5/webcomponents-icons/dist/create.js';
-import {
-  Bar,
-  Button,
-  Page,
-  Title,
-  MessageStrip,
-  MessageBox,
-  MessageBoxAction,
-} from '@ui5/webcomponents-react';
+import { Bar, Button, Page, Title, MessageStrip, MessageBox, MessageBoxAction } from '@ui5/webcomponents-react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
-import {
-  Process,
-  CreateProcess,
-  UpdateProcess,
-  ActionResult,
-  ProcessEvent,
-} from '../db-actions';
+import { Process, CreateProcess, UpdateProcess, ActionResult, ProcessEvent } from '../db-actions';
 import { ProcessTabContainer } from './process-tab-container';
 import { CreateItemDialog } from './create-item-dialog';
 
@@ -84,9 +70,7 @@ export default function ProcessPage({ initialData }: ProcessPageProps) {
       setFormData((prev) => ({
         ...prev,
         processItems: (prev.processItems || []).map((item) =>
-          item.type === editingItem.type && item.sequence === editingItem.sequence
-            ? { ...item, ...newItem }
-            : item,
+          item.type === editingItem.type && item.sequence === editingItem.sequence ? { ...item, ...newItem } : item,
         ),
       }));
       setEditingItem(null);
@@ -201,12 +185,8 @@ export default function ProcessPage({ initialData }: ProcessPageProps) {
         type="Confirm"
       >
         Are you sure you want to delete this Process Event (Type:{' '}
-        {pendingDeleteItem?.type === 1
-          ? 'Start'
-          : pendingDeleteItem?.type === 2
-            ? 'Intermediate'
-            : 'End'}
-        , Sequence: {pendingDeleteItem?.sequence})?
+        {pendingDeleteItem?.type === 1 ? 'Start' : pendingDeleteItem?.type === 2 ? 'Intermediate' : 'End'}, Sequence:{' '}
+        {pendingDeleteItem?.sequence})?
       </MessageBox>
 
       <Page
