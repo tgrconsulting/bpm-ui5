@@ -1,7 +1,7 @@
 // auth.ts
 import NextAuth from "next-auth"
 import Google from "next-auth/providers/google"
-//import { query } from "@/lib/db"
+import { query } from "@/lib/db"
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
     providers: [
@@ -18,21 +18,19 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             if (!user?.email) return false;
 
             try {
-                return true;
+                // 2. Query your specific table: tbl_users
+                const result = await query(
+                    "SELECT 1 FROM tbl_users WHERE email = $1 LIMIT 1",
+                    [user.email]
+                );
 
-                // // 2. Query your specific table: tbl_users
-                // const result = await query(
-                //     "SELECT 1 FROM tbl_users WHERE email = $1 LIMIT 1",
-                //     [user.email]
-                // );
+                // 3. If a match is found in tbl_users, allow the login
+                if (result.rowCount && result.rowCount > 0) {
+                    return true;
+                }
 
-                // // 3. If a match is found in tbl_users, allow the login
-                // if (result.rowCount && result.rowCount > 0) {
-                //     return true;
-                // }
-
-                // // 4. Otherwise, redirect to login with error parameter
-                // return "/login?error=AccessDenied";
+                // 4. Otherwise, redirect to login with error parameter
+                return "/login?error=AccessDenied";
             } catch (error) {
                 console.error("PostgreSQL Error:", error);
                 // Deny access on database failure for security
