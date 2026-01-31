@@ -18,19 +18,21 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             if (!user?.email) return false;
 
             try {
-                // 2. Query your specific table: tbl_users
-                const result = await query(
-                    "SELECT 1 FROM tbl_users WHERE email = $1 LIMIT 1",
-                    [user.email]
-                );
+                return true;
 
-                // 3. If a match is found in tbl_users, allow the login
-                if (result.rowCount && result.rowCount > 0) {
-                    return true;
-                }
+                // // 2. Query your specific table: tbl_users
+                // const result = await query(
+                //     "SELECT 1 FROM tbl_users WHERE email = $1 LIMIT 1",
+                //     [user.email]
+                // );
 
-                // 4. Otherwise, redirect to login with error parameter
-                return "/login?error=AccessDenied";
+                // // 3. If a match is found in tbl_users, allow the login
+                // if (result.rowCount && result.rowCount > 0) {
+                //     return true;
+                // }
+
+                // // 4. Otherwise, redirect to login with error parameter
+                // return "/login?error=AccessDenied";
             } catch (error) {
                 console.error("PostgreSQL Error:", error);
                 // Deny access on database failure for security
