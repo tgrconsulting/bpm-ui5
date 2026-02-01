@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "update-types": "npx supabase gen types typescript --project-id ythixnylcizlewxukyiw > types/supabase.ts"
   },
   "dependencies": {
     "@types/node": "24.10.7",
@@ -32,6 +33,7 @@
     "react-dom": "19.2.3"
   },
   "devDependencies": {
-    "@types/pg": "^8.16.0"
+    "@types/pg": "^8.16.0",
+    "supabase": "^2.74.5"
   }
 }
