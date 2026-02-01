@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
+    "db:diff": "npx supabase db diff --db-url \"postgresql://tgrconsulting:Sntgr9999@localhost:5432/bpmexpress\" -f",
     "update-types": "npx supabase gen types typescript --project-id ythixnylcizlewxukyiw > types/supabase.ts"
   },
   "dependencies": {
