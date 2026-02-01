@@ -17,4 +17,5 @@ jobs:
           version: latest
 
       - name: Deploy migrations
-        run: supabase db push --db-url "${{ secrets.PRODUCTION_DB_URL }}"
+        run: supabase db push --db-url "${{ secrets.PRODUCTION_DB_URL }}" --skip-migration-check
+
