@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
-    "db:diff": "npx supabase db diff --schema public --db-url \"postgresql://tgrconsulting:Sntgr9999@localhost:5432/bpmexpress\" --use-migra \"postgresql://postgres:vYPFmz2kjXh89iQY@db.ythixnylcizlewxukyiw.supabase.co:6543/postgres\" -f"
+    "db:diff": "npx supabase db diff --local -s public -f"
   },
   "dependencies": {
     "@types/node": "24.10.7",
