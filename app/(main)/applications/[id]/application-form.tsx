@@ -92,7 +92,8 @@ export default function ApplicationForm({ initialData }: ApplicationFormProps) {
 
       setTimeout(() => {
         router.refresh();
-      }, 1500);
+        setSaveStatus(null);
+      }, 3000);
     } else {
       setSaveStatus({
         design: 'Negative',

@@ -9,6 +9,7 @@ import { Application } from '../applications/db-actions';
 
 export interface Process {
   process_id: string;
+  process_type: string;
   description: string;
   group_id: string;
   processItems?: ProcessEvent[];
@@ -77,8 +78,9 @@ export async function ReadProcess(id: string): Promise<ActionResult<Process>> {
         success: true,
         data: {
           process_id: '',
-          description: '',
+          process_type: '',
           group_id: '',
+          description: '',
           processItems: [],
           groups: availableGroups,
           applications: availableApplications,
@@ -119,15 +121,16 @@ export async function CreateProcess(process: Process): Promise<ActionResult> {
     await query('BEGIN', []);
 
     const processSql = `
-      INSERT INTO tbl_processes (process_id, description, group_id)
-      VALUES ($1, $2, $3)
+      INSERT INTO tbl_processes (process_id, process_type, group_id,description)
+      VALUES ($1, $2, $3, $4)
       ON CONFLICT (process_id) DO NOTHING
       RETURNING process_id
     `;
     const processResult = await query(processSql, [
       process.process_id.trim(),
-      process.description.trim(),
+      process.process_type.trim(),
       process.group_id.trim(),
+      process.description.trim(),
     ]);
 
     if (processResult.rows.length === 0) {
@@ -164,11 +167,16 @@ export async function UpdateProcess(id: string, process: Process): Promise<Actio
     // 1. Update Parent
     const updateSql = `
       UPDATE tbl_processes
-      SET description = $1, group_id = $2
-      WHERE process_id = $3
+      SET process_type = $2, group_id = $3, description = $4
+      WHERE process_id = $1
       RETURNING process_id
     `;
-    const result = await query(updateSql, [process.description.trim(), process.group_id.trim(), id]);
+    const result = await query(updateSql, [
+      id,
+      process.process_type.trim(),
+      process.group_id.trim(),
+      process.description.trim(),
+    ]);
 
     if (result.rowCount === 0) {
       await query('ROLLBACK', []);

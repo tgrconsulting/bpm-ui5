@@ -109,7 +109,7 @@ export default function ApplicationsPage() {
       }
 
       // Auto-clear status after 5 seconds
-      setTimeout(() => setStatus(null), 5000);
+      setTimeout(() => setStatus(null), 3000);
     }
     setPendingDeleteId(null);
   };

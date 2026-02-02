@@ -9,7 +9,7 @@ import '@ui5/webcomponents-icons/dist/save.js';
 import createIcon from '@ui5/webcomponents-icons/dist/create.js';
 import { Bar, Button, Page, Title, MessageStrip, MessageBox, MessageBoxAction } from '@ui5/webcomponents-react';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 import { Process, CreateProcess, UpdateProcess, ActionResult, ProcessEvent } from '../db-actions';
 import { ProcessTabContainer } from './process-tab-container';
@@ -46,9 +46,19 @@ export default function ProcessPage({ initialData }: ProcessPageProps) {
   const [pendingDeleteItem, setPendingDeleteItem] = useState<ProcessEvent | null>(null);
   const [errors, setErrors] = useState({
     process_id: false,
-    description: false,
+    process_type: false,
     group_id: false,
+    description: false,
   });
+
+  useEffect(() => {
+    // Check if every value in the errors object is false
+    const hasNoErrors = Object.values(errors).every((error) => error === false);
+
+    if (hasNoErrors) {
+      setSaveStatus(null);
+    }
+  }, [errors]);
 
   // --------------------------------------------------------------------------
   // Event Handlers
@@ -145,8 +155,9 @@ export default function ProcessPage({ initialData }: ProcessPageProps) {
     setSaveStatus(null);
     const newErrors = {
       process_id: !formData.process_id.trim(),
-      description: !formData.description.trim(),
+      process_type: !formData.process_type?.trim(),
       group_id: !formData.group_id?.trim(),
+      description: !formData.description.trim(),
     };
     setErrors(newErrors);
 
@@ -164,7 +175,10 @@ export default function ProcessPage({ initialData }: ProcessPageProps) {
         design: 'Positive',
         message: `Process ${isUpdate ? 'updated' : 'created'} successfully!`,
       });
-      setTimeout(() => router.refresh(), 1500);
+      setTimeout(() => {
+        router.refresh();
+        setSaveStatus(null);
+      }, 3000);
     } else {
       setSaveStatus({
         design: 'Negative',

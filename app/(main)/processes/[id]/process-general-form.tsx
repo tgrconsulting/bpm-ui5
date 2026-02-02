@@ -32,6 +32,16 @@ export function ProcessGeneralForm({
   availableGroups,
 }: ProcessGeneralFormProps) {
   // --------------------------------------------------------------------------
+  // State Management
+  // --------------------------------------------------------------------------
+  const typeMap: Record<string, string> = {
+    S: 'Single',
+    D: 'Standard',
+    B: 'Batch',
+  };
+  const processTypeValue = typeMap[formData.process_type] || '';
+
+  // --------------------------------------------------------------------------
   // Event Handlers
   // --------------------------------------------------------------------------
 
@@ -69,6 +79,28 @@ export function ProcessGeneralForm({
     if (errors.description) setErrors({ ...errors, description: false });
   };
 
+  /**
+   * Handles type selection from ComboBox.
+   *
+   * @param {any} e - The selection change event
+   * @returns {void}
+   */
+  const handleTypeChange = (e: any) => {
+    const selectedText = e.detail.item ? e.target.value : '';
+    const typeMapping: Record<string, string> = {
+      Single: 'S',
+      Batch: 'B',
+      Standard: 'D',
+    };
+    const processCode = typeMapping[selectedText] || '';
+
+    setFormData({ ...formData, process_type: processCode });
+
+    if (errors.process_type) {
+      setErrors({ ...errors, process_type: false });
+    }
+  };
+
   // --------------------------------------------------------------------------
   // Render
   // --------------------------------------------------------------------------
@@ -88,6 +120,27 @@ export function ProcessGeneralForm({
             valueState={errors.process_id ? 'Negative' : 'None'}
             onInput={handleProcessIdChange}
           />
+        </FormItem>
+
+        <FormItem labelContent={<Label required>Type</Label>}>
+          <ComboBox
+            value={processTypeValue || ''}
+            valueState={errors.process_type ? 'Negative' : 'None'}
+            onSelectionChange={handleTypeChange}
+          >
+            <ComboBoxItem
+              key={'S'}
+              text="Single"
+            />
+            <ComboBoxItem
+              key={'D'}
+              text="Standard"
+            />
+            <ComboBoxItem
+              key={'B'}
+              text="Batch"
+            />
+          </ComboBox>
         </FormItem>
 
         <FormItem labelContent={<Label required>Group</Label>}>
