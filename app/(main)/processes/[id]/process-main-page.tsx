@@ -37,7 +37,6 @@ export default function ProcessPage({ initialData }: ProcessPageProps) {
 
   const isUpdate = Boolean(initialData.process_id?.trim());
   const [formData, setFormData] = useState<Process>(initialData);
-  const [activeTab, setActiveTab] = useState('General');
   const [saveStatus, setSaveStatus] = useState<{
     design: 'Positive' | 'Negative' | 'Information';
     message: string;
