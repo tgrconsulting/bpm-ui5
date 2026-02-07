@@ -10,6 +10,7 @@ import { Application } from '../applications/db-actions';
 export interface Process {
   process_id: string;
   process_type: string;
+  process_status: string;
   description: string;
   group_id: string;
   processItems?: ProcessEvent[];
@@ -80,6 +81,7 @@ export async function ReadProcess(id: string): Promise<ActionResult<Process>> {
           process_id: '',
           process_type: '',
           group_id: '',
+          process_status: '',
           description: '',
           processItems: [],
           groups: availableGroups,
@@ -121,14 +123,15 @@ export async function CreateProcess(process: Process): Promise<ActionResult> {
     await query('BEGIN', []);
 
     const processSql = `
-      INSERT INTO tbl_processes (process_id, process_type, group_id,description)
-      VALUES ($1, $2, $3, $4)
+      INSERT INTO tbl_processes (process_id, process_type, process_status, group_id,description)
+      VALUES ($1, $2, $3, $4, $5)
       ON CONFLICT (process_id) DO NOTHING
       RETURNING process_id
     `;
     const processResult = await query(processSql, [
       process.process_id.trim(),
       process.process_type.trim(),
+      process.process_status.trim(),
       process.group_id.trim(),
       process.description.trim(),
     ]);
@@ -167,13 +170,14 @@ export async function UpdateProcess(id: string, process: Process): Promise<Actio
     // 1. Update Parent
     const updateSql = `
       UPDATE tbl_processes
-      SET process_type = $2, group_id = $3, description = $4
+      SET process_type = $2, process_status = $3, group_id = $4, description = $5
       WHERE process_id = $1
       RETURNING process_id
     `;
     const result = await query(updateSql, [
       id,
       process.process_type.trim(),
+      process.process_status.trim(),
       process.group_id.trim(),
       process.description.trim(),
     ]);

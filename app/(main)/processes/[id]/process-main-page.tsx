@@ -12,8 +12,9 @@ import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 
 import { Process, CreateProcess, UpdateProcess, ActionResult, ProcessEvent } from '../db-actions';
-import { ProcessTabContainer } from './process-tab-container';
+import { ProcessItemsTable } from './processitems-table';
 import { CreateItemDialog } from './create-item-dialog';
+import { ProcessGeneralForm } from './process-general-form';
 
 // ============================================================================
 // Types
@@ -207,12 +208,11 @@ export default function ProcessPage({ initialData }: ProcessPageProps) {
         noScrolling={true}
         backgroundDesign="Solid"
         style={{
+          height: '100%',
           ['--sapBackgroundColor' as any]: '#ffffff',
-          ['--sapGroup_ContentBackground' as any]: '#ffffff',
         }}
         header={
           <Bar
-            design="Header"
             style={{ height: '3.5rem' }}
             startContent={
               <>
@@ -226,13 +226,6 @@ export default function ProcessPage({ initialData }: ProcessPageProps) {
             }
             endContent={
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <Button
-                  icon={createIcon}
-                  onClick={() => setIsDialogOpen(true)}
-                  disabled={activeTab !== 'Events'}
-                >
-                  Create Event
-                </Button>
                 <Button
                   design="Emphasized"
                   icon="save"
@@ -258,18 +251,58 @@ export default function ProcessPage({ initialData }: ProcessPageProps) {
           )
         }
       >
-        <ProcessTabContainer
-          formData={formData}
-          setFormData={setFormData}
-          errors={errors}
-          setErrors={setErrors}
-          isUpdate={isUpdate}
-          availableGroups={initialData.groups || []}
-          onTabChange={setActiveTab}
-          onEditItem={handleEditItem}
-          onDeleteItem={(item) => setPendingDeleteItem(item)}
-        />
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            height: '100%',
+            width: '100%',
+          }}
+        >
+          <ProcessGeneralForm
+            formData={formData}
+            setFormData={setFormData}
+            errors={errors}
+            setErrors={setErrors}
+            isUpdate={isUpdate}
+            availableGroups={initialData.groups || []}
+          />
 
+          <Bar
+            design="Header"
+            style={{ height: '3.5rem' }}
+            startContent={
+              <>
+                <Title level="H3">Process Events</Title>
+              </>
+            }
+            endContent={
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <Button
+                  icon={createIcon}
+                  onClick={() => setIsDialogOpen(true)}
+                >
+                  Create Event
+                </Button>
+              </div>
+            }
+          />
+          <div
+            style={{
+              flex: 1, // Grow to fill remaining space
+              overflow: 'hidden', // Contain the table so it scrolls internally
+              display: 'flex', // Make this a flex child too
+              flexDirection: 'column',
+              paddingBottom: '2rem', // Optional: adds breathing room at the bottom
+            }}
+          >
+            <ProcessItemsTable
+              items={formData.processItems || []}
+              onEdit={handleEditItem}
+              onDelete={(item) => setPendingDeleteItem(item)}
+            />
+          </div>
+        </div>
         <CreateItemDialog
           open={isDialogOpen}
           onSave={handleItemSave}

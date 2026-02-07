@@ -16,5 +16,16 @@ export default async function Page({ params }: PageProps) {
     notFound();
   }
 
-  return <ProcessPage initialData={result.data} />;
+  return (
+    <>
+      <div
+        style={{
+          height: '100%',
+          width: '100%',
+        }}
+      >
+        <ProcessPage initialData={result.data}></ProcessPage>
+      </div>
+    </>
+  );
 }

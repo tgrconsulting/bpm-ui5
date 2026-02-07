@@ -6,6 +6,8 @@
 
 import editIcon from '@ui5/webcomponents-icons/dist/edit.js';
 import deleteIcon from '@ui5/webcomponents-icons/dist/delete.js';
+import statusPositiveIcon from '@ui5/webcomponents-icons/dist/status-positive.js';
+import statusCriticalIcon from '@ui5/webcomponents-icons/dist/status-critical.js';
 import {
   Table,
   TableRow,
@@ -15,13 +17,14 @@ import {
   TableGrowing,
   TableRowAction,
   Label,
+  Icon,
 } from '@ui5/webcomponents-react';
 import { useMemo, useState } from 'react';
 
 import { Process } from './db-actions';
 
 // ============================================================================
-// Types
+// Types & Constants
 // ============================================================================
 
 type SortOrder = 'Ascending' | 'Descending' | 'None';
@@ -39,34 +42,22 @@ interface ProcessesTableProps {
   onDelete: (id: string) => void;
 }
 
+const PROCESS_TYPE_LABELS: Record<string, string> = {
+  S: 'Single',
+  D: 'Standard',
+  B: 'Batch',
+};
+
 // ============================================================================
 // Component
 // ============================================================================
 
 export function ProcessesTable({ data, hasMore, onLoadMore, onEdit, onDelete }: ProcessesTableProps) {
-  // --------------------------------------------------------------------------
-  // State Management
-  // --------------------------------------------------------------------------
-
-  /**
-   * Sorting configuration with initial sort on process_id ascending.
-   */
   const [sortConfig, setSortConfig] = useState<SortConfig>({
     column: 'process_id',
     order: 'Ascending',
   });
 
-  // --------------------------------------------------------------------------
-  // Event Handlers
-  // --------------------------------------------------------------------------
-
-  /**
-   * Handles sorting for a given column.
-   * Toggles between Ascending/Descending for same column, defaults to Ascending for new columns.
-   *
-   * @param {keyof Process} column - The column to sort by
-   * @returns {void}
-   */
   const handleSort = (column: keyof Process) => {
     setSortConfig((prev) => {
       if (prev.column === column) {
@@ -79,19 +70,17 @@ export function ProcessesTable({ data, hasMore, onLoadMore, onEdit, onDelete }: 
     });
   };
 
-  // --------------------------------------------------------------------------
-  // Computed Values
-  // --------------------------------------------------------------------------
-
-  /**
-   * Sorts the data based on current sort configuration.
-   */
   const sortedData = useMemo(() => {
     if (!sortConfig.column || sortConfig.order === 'None') return data;
 
     return [...data].sort((a, b) => {
-      const aValue = (a[sortConfig.column!] || '').toString().toLowerCase();
-      const bValue = (b[sortConfig.column!] || '').toString().toLowerCase();
+      let aValue = (a[sortConfig.column!] || '').toString().toLowerCase();
+      let bValue = (b[sortConfig.column!] || '').toString().toLowerCase();
+
+      if (sortConfig.column === 'process_type') {
+        aValue = (PROCESS_TYPE_LABELS[a.process_type as string] || '').toLowerCase();
+        bValue = (PROCESS_TYPE_LABELS[b.process_type as string] || '').toLowerCase();
+      }
 
       if (aValue < bValue) return sortConfig.order === 'Ascending' ? -1 : 1;
       if (aValue > bValue) return sortConfig.order === 'Ascending' ? 1 : -1;
@@ -99,16 +88,35 @@ export function ProcessesTable({ data, hasMore, onLoadMore, onEdit, onDelete }: 
     });
   }, [data, sortConfig]);
 
-  // --------------------------------------------------------------------------
-  // Render
-  // --------------------------------------------------------------------------
+  const renderStatusIcon = (status: string) => {
+    // Wrapped in a centered div to ensure middle alignment within the cell
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
+        {status === 'A' && (
+          <Icon
+            name={statusPositiveIcon}
+            design="Positive"
+            accessibleName="Active"
+            title="Active"
+          />
+        )}
+        {status === 'I' && (
+          <Icon
+            name={statusCriticalIcon}
+            design="Critical"
+            accessibleName="Inactive"
+            title="Inactive"
+          />
+        )}
+      </div>
+    );
+  };
 
   return (
     <Table
       style={{ height: '100%', width: '100%', minWidth: '100%' }}
       headerRow={
         <TableHeaderRow sticky>
-          {/* Process ID Column */}
           <TableHeaderCell
             sortIndicator={sortConfig.column === 'process_id' ? sortConfig.order : 'None'}
             onClick={() => handleSort('process_id')}
@@ -116,7 +124,6 @@ export function ProcessesTable({ data, hasMore, onLoadMore, onEdit, onDelete }: 
             <Label>Process</Label>
           </TableHeaderCell>
 
-          {/* Description Column */}
           <TableHeaderCell
             sortIndicator={sortConfig.column === 'description' ? sortConfig.order : 'None'}
             onClick={() => handleSort('description')}
@@ -124,12 +131,26 @@ export function ProcessesTable({ data, hasMore, onLoadMore, onEdit, onDelete }: 
             <Label>Description</Label>
           </TableHeaderCell>
 
-          {/* Group ID Column */}
           <TableHeaderCell
             sortIndicator={sortConfig.column === 'group_id' ? sortConfig.order : 'None'}
             onClick={() => handleSort('group_id')}
           >
             <Label>Group</Label>
+          </TableHeaderCell>
+
+          <TableHeaderCell
+            sortIndicator={sortConfig.column === 'process_type' ? sortConfig.order : 'None'}
+            onClick={() => handleSort('process_type')}
+          >
+            <Label>Type</Label>
+          </TableHeaderCell>
+
+          <TableHeaderCell
+            horizontalAlign="Center"
+            sortIndicator={sortConfig.column === 'process_status' ? sortConfig.order : 'None'}
+            onClick={() => handleSort('process_status')}
+          >
+            <Label>Status</Label>
           </TableHeaderCell>
         </TableHeaderRow>
       }
@@ -170,6 +191,11 @@ export function ProcessesTable({ data, hasMore, onLoadMore, onEdit, onDelete }: 
           <TableCell>
             <Label>{row.group_id}</Label>
           </TableCell>
+          <TableCell>
+            <Label>{PROCESS_TYPE_LABELS[row.process_type as string] || row.process_type}</Label>
+          </TableCell>
+          {/* Status Cell with centered icon content */}
+          <TableCell>{renderStatusIcon(row.process_status as string)}</TableCell>
         </TableRow>
       ))}
     </Table>

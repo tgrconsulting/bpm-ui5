@@ -162,7 +162,7 @@ export default function FloorPlanPage({ children }: { children: React.ReactNode 
           {/* Page Content Viewport */}
           <div
             style={{
-              margin: '2px',
+              margin: '1px',
               flexGrow: 1,
               overflow: 'auto',
               display: 'flex',

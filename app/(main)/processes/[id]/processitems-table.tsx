@@ -48,7 +48,8 @@ export function ProcessItemsTable({ items, onEdit, onDelete }: ProcessItemsTable
 
   return (
     <Table
-      style={{ width: '100%' }}
+      style={{ height: '100%', width: '100%', minWidth: '100%' }}
+      overflowMode="Scroll"
       headerRow={
         <TableHeaderRow sticky>
           <TableHeaderCell>
