@@ -24,6 +24,7 @@ export interface ProcessEvent {
   sequence: number;
   description: string;
   application_id: string;
+  duration: number;
 }
 
 export type ActionResult<T = void> = {
@@ -95,7 +96,7 @@ export async function ReadProcess(id: string): Promise<ActionResult<Process>> {
       return { success: false, error: 'Process not found.' };
     }
 
-    const itemsResult = await query(
+    const eventsResult = await query(
       'SELECT * FROM tbl_processevents WHERE process_id = $1 ORDER BY type ASC, sequence ASC',
       [id],
     );
@@ -104,7 +105,7 @@ export async function ReadProcess(id: string): Promise<ActionResult<Process>> {
       success: true,
       data: {
         ...(processResult.rows[0] as Process),
-        processItems: itemsResult.rows as ProcessEvent[],
+        processItems: eventsResult.rows as ProcessEvent[],
         groups: availableGroups,
         applications: availableApplications,
       },
@@ -144,8 +145,15 @@ export async function CreateProcess(process: Process): Promise<ActionResult> {
     if (process.processItems && process.processItems.length > 0) {
       for (const pi of process.processItems) {
         await query(
-          'INSERT INTO tbl_processevents (process_id, type, sequence, description, application_id) VALUES ($1, $2, $3, $4, $5)',
-          [process.process_id.trim(), pi.type, pi.sequence, pi.description.trim(), pi.application_id.trim()],
+          'INSERT INTO tbl_processevents (process_id, type, sequence, description, application_id, duration) VALUES ($1, $2, $3, $4, $5, $6)',
+          [
+            process.process_id.trim(),
+            pi.type,
+            pi.sequence,
+            pi.description.trim(),
+            pi.application_id.trim(),
+            pi.duration,
+          ],
         );
       }
     }
@@ -193,8 +201,8 @@ export async function UpdateProcess(id: string, process: Process): Promise<Actio
     if (process.processItems && process.processItems.length > 0) {
       for (const pi of process.processItems) {
         await query(
-          'INSERT INTO tbl_processevents (process_id, type, sequence, description, application_id) VALUES ($1, $2, $3, $4, $5)',
-          [id, pi.type, pi.sequence, pi.description.trim(), pi.application_id.trim()],
+          'INSERT INTO tbl_processevents (process_id, type, sequence, description, application_id, duration) VALUES ($1, $2, $3, $4, $5, $6)',
+          [id, pi.type, pi.sequence, pi.description.trim(), pi.application_id.trim(), pi.duration],
         );
       }
     }

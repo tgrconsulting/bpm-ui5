@@ -208,7 +208,6 @@ export default function ProcessPage({ initialData }: ProcessPageProps) {
         backgroundDesign="Solid"
         style={{
           height: '100%',
-          ['--sapBackgroundColor' as any]: '#ffffff',
         }}
         header={
           <Bar
@@ -237,17 +236,19 @@ export default function ProcessPage({ initialData }: ProcessPageProps) {
           />
         }
         footer={
-          saveStatus && (
-            <Bar design="Footer">
-              <MessageStrip
-                design={saveStatus.design}
-                onClose={() => setSaveStatus(null)}
-                style={{ width: '100%' }}
-              >
-                {saveStatus.message}
-              </MessageStrip>
-            </Bar>
-          )
+          <div style={{ alignItems: 'center', display: 'flex', justifyContent: 'center' }}>
+            {saveStatus && (
+              <Bar design="Footer">
+                <MessageStrip
+                  design={saveStatus.design}
+                  onClose={() => setSaveStatus(null)}
+                  style={{ width: '100%' }}
+                >
+                  {saveStatus.message}
+                </MessageStrip>
+              </Bar>
+            )}
+          </div>
         }
       >
         <div
@@ -256,6 +257,7 @@ export default function ProcessPage({ initialData }: ProcessPageProps) {
             flexDirection: 'column',
             height: '100%',
             width: '100%',
+            marginTop: '2rem',
           }}
         >
           <ProcessGeneralForm
@@ -269,7 +271,7 @@ export default function ProcessPage({ initialData }: ProcessPageProps) {
 
           <Bar
             design="Header"
-            style={{ height: '3.5rem' }}
+            style={{ height: '3.5rem', marginTop: '2rem' }}
             startContent={
               <>
                 <Title level="H3">Process Events</Title>
@@ -292,7 +294,7 @@ export default function ProcessPage({ initialData }: ProcessPageProps) {
               overflow: 'hidden', // Contain the table so it scrolls internally
               display: 'flex', // Make this a flex child too
               flexDirection: 'column',
-              paddingBottom: '2rem', // Optional: adds breathing room at the bottom
+              marginBottom: '0.5rem',
             }}
           >
             <ProcessItemsTable

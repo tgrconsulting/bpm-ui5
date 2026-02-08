@@ -53,9 +53,11 @@ export function CreateItemDialog({
   const [sequence, setSequence] = useState('');
   const [description, setDescription] = useState('');
   const [applicationId, setApplicationId] = useState('');
+  const [duration, setDuration] = useState('');
   const [error, setError] = useState(false);
   const [descriptionError, setDescriptionError] = useState(false);
   const [applicationError, setApplicationError] = useState(false);
+  const [durationError, setDurationError] = useState(false);
   const [duplicateError, setDuplicateError] = useState<string | null>(null);
 
   // --------------------------------------------------------------------------
@@ -73,15 +75,18 @@ export function CreateItemDialog({
         setSequence(editingItem.sequence.toString());
         setDescription(editingItem.description);
         setApplicationId(editingItem.application_id);
+        setDuration(editingItem.duration.toString());
       } else {
         setType(1);
         setSequence('');
         setDescription('');
         setApplicationId('');
+        setDuration('');
       }
       setError(false);
       setDescriptionError(false);
       setApplicationError(false);
+      setDurationError(false);
       setDuplicateError(null);
     }
   }, [open, editingItem]);
@@ -98,6 +103,7 @@ export function CreateItemDialog({
    */
   const handleSave = () => {
     const seqNumber = parseInt(sequence);
+    const durationNumber = parseInt(duration);
     let hasErrors = false;
 
     // Validate sequence
@@ -124,6 +130,14 @@ export function CreateItemDialog({
       setApplicationError(false);
     }
 
+    // Validate duration
+    if (isNaN(durationNumber)) {
+      setDurationError(true);
+      hasErrors = true;
+    } else {
+      setDurationError(false);
+    }
+
     if (hasErrors) {
       return;
     }
@@ -147,6 +161,7 @@ export function CreateItemDialog({
         sequence: seqNumber,
         description: description.trim(),
         application_id: applicationId.trim(),
+        duration: durationNumber,
       },
       !!editingItem,
     );
@@ -164,9 +179,11 @@ export function CreateItemDialog({
     setSequence('');
     setDescription('');
     setApplicationId('');
+    setDuration('');
     setError(false);
     setDescriptionError(false);
     setApplicationError(false);
+    setDurationError(false);
     setDuplicateError(null);
   };
 
@@ -279,6 +296,18 @@ export function CreateItemDialog({
               </Option>
             ))}
           </Select>
+        </FormItem>
+
+        <FormItem labelContent={<Label required>Duration (Sec)</Label>}>
+          <Input
+            type="Number"
+            value={duration}
+            valueState={durationError ? 'Negative' : 'None'}
+            onInput={(e: any) => {
+              setDuration(e.target.value);
+              if (durationError) setDurationError(false);
+            }}
+          />
         </FormItem>
 
         {duplicateError && (

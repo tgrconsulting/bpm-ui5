@@ -36,9 +36,7 @@ export function ProcessItemsTable({ items, onEdit, onDelete }: ProcessItemsTable
     return (
       <div
         style={{
-          padding: '3rem',
           textAlign: 'center',
-          backgroundColor: 'var(--sapList_Background)',
         }}
       >
         <Label>No items found for this process.</Label>
@@ -63,6 +61,9 @@ export function ProcessItemsTable({ items, onEdit, onDelete }: ProcessItemsTable
           </TableHeaderCell>
           <TableHeaderCell>
             <Label>Application</Label>
+          </TableHeaderCell>
+          <TableHeaderCell>
+            <Label>Duration (Sec)</Label>
           </TableHeaderCell>
         </TableHeaderRow>
       }
@@ -98,6 +99,9 @@ export function ProcessItemsTable({ items, onEdit, onDelete }: ProcessItemsTable
           </TableCell>
           <TableCell>
             <Label>{item.application_id}</Label>
+          </TableCell>
+          <TableCell>
+            <Label>{item.duration}</Label>
           </TableCell>
         </TableRow>
       ))}
