@@ -131,7 +131,6 @@ export default function ApplicationForm({ initialData }: ApplicationFormProps) {
   return (
     <Page
       noScrolling={true}
-      backgroundDesign="List"
       header={
         <Bar
           design="Header"
@@ -177,7 +176,7 @@ export default function ApplicationForm({ initialData }: ApplicationFormProps) {
       }
     >
       <Form
-        style={{ width: '100%', height: '100%', padding: '1rem' }}
+        style={{ width: '100%', height: '100%', marginTop: '2rem' }}
         labelSpan="S12 M2 L2 XL1"
         emptySpan="S0 M3 L5 XL7"
         layout="S1 M1 L1 XL1"

@@ -13,7 +13,6 @@ import {
   Input,
   ObjectStatus,
   Label,
-  Title,
 } from '@ui5/webcomponents-react';
 
 // ============================================================================
@@ -27,6 +26,7 @@ interface ProcessGeneralFormProps {
   setErrors: (errors: any) => void;
   isUpdate: boolean;
   availableGroups: any[];
+  isStatusActive: boolean;
 }
 
 // ============================================================================
@@ -39,6 +39,7 @@ export function ProcessGeneralForm({
   errors,
   setErrors,
   isUpdate,
+  isStatusActive,
   availableGroups,
 }: ProcessGeneralFormProps) {
   // --------------------------------------------------------------------------
@@ -56,7 +57,6 @@ export function ProcessGeneralForm({
    * A -> Active (Positive/Green)
    * I -> Inactive (Critical/Orange) - Assuming 'I' for Inactive based on typical patterns
    */
-  const isStatusActive = formData.process_status === 'A';
   const statusText = isStatusActive ? 'Active' : 'Inactive';
   const statusState = isStatusActive ? 'Positive' : 'Critical';
 
@@ -97,7 +97,7 @@ export function ProcessGeneralForm({
   // --------------------------------------------------------------------------
 
   return (
-    <div style={{ width: '100%' }}>
+    <div style={{ width: '100%', marginTop: '0.2rem' }}>
       <Form
         style={{ height: '100%' }}
         labelSpan="S12 M3 L2 XL1"
@@ -105,14 +105,6 @@ export function ProcessGeneralForm({
         layout="S1 M2 L2 XL2"
       >
         <FormGroup>
-          <Title
-            level="H3"
-            slot="header"
-            style={{ paddingBlock: '0.5rem' }}
-          >
-            General
-          </Title>
-
           <FormItem labelContent={<Label required>Process</Label>}>
             <Input
               value={formData.process_id}
@@ -169,12 +161,6 @@ export function ProcessGeneralForm({
         </FormGroup>
 
         <FormGroup>
-          <Title
-            level="H3"
-            slot="header"
-            style={{ paddingBlock: '0.5rem' }}
-          ></Title>
-
           <FormItem labelContent={<Label>Status</Label>}>
             <div
               style={{

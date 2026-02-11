@@ -4,17 +4,21 @@
 // Imports
 // ============================================================================
 
+import { isEqual } from 'lodash';
+import activateIcon from '@ui5/webcomponents-icons/dist/activate.js';
+import createIcon from '@ui5/webcomponents-icons/dist/create.js';
+import acceptIcon from '@ui5/webcomponents-icons/dist/accept.js';
 import '@ui5/webcomponents-icons/dist/nav-back.js';
 import '@ui5/webcomponents-icons/dist/save.js';
-import createIcon from '@ui5/webcomponents-icons/dist/create.js';
-import { Bar, Button, Page, Title, MessageStrip, MessageBox, MessageBoxAction } from '@ui5/webcomponents-react';
+import { Bar, Button, Icon, MessageBox, MessageBoxAction, MessageStrip, Page, Title } from '@ui5/webcomponents-react';
 import { useRouter } from 'next/navigation';
-import { useState, useEffect } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 
-import { Process, CreateProcess, UpdateProcess, ActionResult, ProcessEvent } from '../db-actions';
-import { ProcessItemsTable } from './processitems-table';
+import { ActionResult, CreateProcess, Process, ProcessEvent, UpdateProcess } from '../db-actions';
 import { CreateItemDialog } from './create-item-dialog';
 import { ProcessGeneralForm } from './process-general-form';
+import { ProcessItemsTable } from './processitems-table';
+import { is } from 'zod/v4/locales';
 
 // ============================================================================
 // Types
@@ -35,21 +39,27 @@ export default function ProcessPage({ initialData }: ProcessPageProps) {
   // State Management
   // --------------------------------------------------------------------------
 
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isStatusActive, setIsStatusActive] = useState<boolean>(initialData.process_status === 'A');
+  const [editingItem, setEditingItem] = useState<ProcessEvent | null>(null);
+  const [pendingDeleteItem, setPendingDeleteItem] = useState<ProcessEvent | null>(null);
   const isUpdate = Boolean(initialData.process_id?.trim());
+  const statusText = isStatusActive ? 'De-Activate' : 'Activate';
   const [formData, setFormData] = useState<Process>(initialData);
   const [saveStatus, setSaveStatus] = useState<{
     design: 'Positive' | 'Negative' | 'Information';
     message: string;
   } | null>(null);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingItem, setEditingItem] = useState<ProcessEvent | null>(null);
-  const [pendingDeleteItem, setPendingDeleteItem] = useState<ProcessEvent | null>(null);
   const [errors, setErrors] = useState({
     process_id: false,
     process_type: false,
     group_id: false,
     description: false,
   });
+  const [baseData, setBaseData] = useState<Process>(initialData);
+  const isDirty = useMemo(() => {
+    return !isEqual(formData, baseData);
+  }, [formData, baseData]);
 
   useEffect(() => {
     // Check if every value in the errors object is false
@@ -111,22 +121,11 @@ export default function ProcessPage({ initialData }: ProcessPageProps) {
     }, 3000);
   };
 
-  /**
-   * Opens the dialog for editing a process event.
-   *
-   * @param item - The event to edit
-   */
   const handleEditItem = (item: ProcessEvent) => {
     setEditingItem(item);
     setIsDialogOpen(true);
   };
 
-  /**
-   * Handles deletion confirmation for a process event.
-   * Removes the event from the list if confirmed.
-   *
-   * @param action - The user's action (OK or Cancel)
-   */
   const handleConfirmDeleteItem = (action: MessageBoxAction | undefined) => {
     if (action === MessageBoxAction.OK && pendingDeleteItem) {
       const itemToDelete = pendingDeleteItem;
@@ -147,10 +146,6 @@ export default function ProcessPage({ initialData }: ProcessPageProps) {
     setPendingDeleteItem(null);
   };
 
-  /**
-   * Handles saving the entire process with its events.
-   * Validates all required fields before submission.
-   */
   const handleSave = async () => {
     setSaveStatus(null);
     const newErrors = {
@@ -171,6 +166,7 @@ export default function ProcessPage({ initialData }: ProcessPageProps) {
       : await CreateProcess(formData);
 
     if (result.success) {
+      setBaseData(formData);
       setSaveStatus({
         design: 'Positive',
         message: `Process ${isUpdate ? 'updated' : 'created'} successfully!`,
@@ -205,7 +201,6 @@ export default function ProcessPage({ initialData }: ProcessPageProps) {
 
       <Page
         noScrolling={true}
-        backgroundDesign="Solid"
         style={{
           height: '100%',
         }}
@@ -225,12 +220,22 @@ export default function ProcessPage({ initialData }: ProcessPageProps) {
             endContent={
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <Button
+                  icon={activateIcon}
+                  onClick={() => setIsStatusActive(!isStatusActive)}
+                >
+                  {statusText}
+                </Button>
+                <Button
                   design="Emphasized"
                   icon="save"
                   onClick={handleSave}
                 >
                   Save
                 </Button>
+                <Icon
+                  design={isDirty ? 'Negative' : 'Positive'}
+                  name={acceptIcon}
+                />
               </div>
             }
           />
@@ -260,12 +265,22 @@ export default function ProcessPage({ initialData }: ProcessPageProps) {
             marginTop: '2rem',
           }}
         >
+          <Bar
+            design="Header"
+            style={{ height: '3.5rem' }}
+            startContent={
+              <>
+                <Title level="H3">General</Title>
+              </>
+            }
+          />
           <ProcessGeneralForm
             formData={formData}
             setFormData={setFormData}
             errors={errors}
             setErrors={setErrors}
             isUpdate={isUpdate}
+            isStatusActive={isStatusActive}
             availableGroups={initialData.groups || []}
           />
 
