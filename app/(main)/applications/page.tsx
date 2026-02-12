@@ -129,7 +129,6 @@ export default function ApplicationsPage() {
 
       <Page
         noScrolling={true}
-        backgroundDesign="List"
         header={
           <Bar
             design="Header"

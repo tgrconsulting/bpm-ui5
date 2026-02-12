@@ -85,40 +85,43 @@ export default function ProcessPage({ initialData }: ProcessPageProps) {
   const handleItemSave = (newItem: Omit<ProcessEvent, 'process_id'>, isEdit: boolean = false) => {
     setIsDialogOpen(false);
 
-    if (isEdit && editingItem) {
-      // Update existing event
-      setFormData((prev) => ({
-        ...prev,
-        processItems: (prev.processItems || []).map((item) =>
-          item.type === editingItem.type && item.sequence === editingItem.sequence ? { ...item, ...newItem } : item,
-        ),
-      }));
-      setEditingItem(null);
-      setSaveStatus({
-        design: 'Positive',
-        message: 'Event updated. Click Save to persist changes.',
-      });
-    } else {
-      // Add new event
-      setFormData((prev) => ({
-        ...prev,
-        processItems: [
-          ...(prev.processItems || []),
-          {
-            ...newItem,
-            process_id: prev.process_id,
-          },
-        ],
-      }));
-      setSaveStatus({
-        design: 'Positive',
-        message: `Event: ${newItem.description} added to list. Click Save to persist changes.`,
-      });
-    }
+    setFormData((prev) => {
+      let updatedItems = [];
 
-    setTimeout(() => {
-      setSaveStatus(null);
-    }, 3000);
+      if (isEdit && editingItem) {
+        // 1. Update existing event
+        updatedItems = (prev.processItems || []).map((item) =>
+          item.type === editingItem.type && item.sequence === editingItem.sequence ? { ...item, ...newItem } : item,
+        );
+      } else {
+        // 2. Add new event
+        updatedItems = [...(prev.processItems || []), { ...newItem, process_id: prev.process_id }];
+      }
+
+      // 3. Sort the updated array by Type, then by Sequence
+      const sortedItems = [...updatedItems].sort((a, b) => {
+        // Sort by Type (numeric)
+        if (a.type !== b.type) {
+          return a.type - b.type;
+        }
+        // If Types are equal, sort by Sequence (numeric)
+        return a.sequence - b.sequence;
+      });
+
+      return {
+        ...prev,
+        processItems: sortedItems,
+      };
+    });
+
+    // Reset editing state and set status messages
+    setEditingItem(null);
+    setSaveStatus({
+      design: 'Positive',
+      message: isEdit ? 'Event updated.' : `Event: ${newItem.description} added.`,
+    });
+
+    setTimeout(() => setSaveStatus(null), 3000);
   };
 
   const handleEditItem = (item: ProcessEvent) => {
@@ -308,7 +311,6 @@ export default function ProcessPage({ initialData }: ProcessPageProps) {
             flexDirection: 'column',
             height: '100%',
             width: '100%',
-            marginTop: '2rem',
           }}
         >
           <Bar
@@ -332,7 +334,7 @@ export default function ProcessPage({ initialData }: ProcessPageProps) {
 
           <Bar
             design="Header"
-            style={{ height: '3.5rem', marginTop: '2rem' }}
+            style={{ height: '3.5rem', marginTop: '1rem' }}
             startContent={
               <>
                 <Title level="H3">Process Events</Title>

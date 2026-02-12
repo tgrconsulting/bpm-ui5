@@ -109,7 +109,6 @@ export default function ProcessPage() {
 
       <Page
         noScrolling={true}
-        backgroundDesign="List"
         header={
           <Bar
             design="Header"

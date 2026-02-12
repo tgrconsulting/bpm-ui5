@@ -128,7 +128,6 @@ export default function GroupsPage() {
 
       <Page
         noScrolling={true}
-        backgroundDesign="List"
         header={
           <Bar
             design="Header"
