@@ -54,6 +54,7 @@ export default function ProcessPage({ initialData }: ProcessPageProps) {
     process_type: false,
     group_id: false,
     description: false,
+    items: false,
   });
   const [baseData, setBaseData] = useState<Process>(initialData);
   const isDirty = useMemo(() => {
@@ -147,16 +148,62 @@ export default function ProcessPage({ initialData }: ProcessPageProps) {
 
   const handleSave = async () => {
     setSaveStatus(null);
+
+    // Validation of general form fields
     const newErrors = {
       process_id: !formData.process_id.trim(),
       process_type: !formData.process_type?.trim(),
       group_id: !formData.group_id?.trim(),
       description: !formData.description.trim(),
+      items: false,
     };
     setErrors(newErrors);
 
     if (Object.values(newErrors).some((err) => err)) {
       setSaveStatus({ design: 'Negative', message: 'Please fix validation errors.' });
+      return;
+    }
+
+    // Validation of process items
+    const items = formData.processItems || [];
+    const typeCounts = items.reduce((acc: Record<string, number>, item) => {
+      acc[item.type] = (acc[item.type] || 0) + 1;
+      return acc;
+    }, {});
+
+    let itemValidationError = '';
+
+    if (formData.process_type === 'S') {
+      // Rule: Exactly 1 item total, and it must be type 1
+      if (items.length !== 1 || typeCounts[1] !== 1) {
+        itemValidationError = "Type 'Single' must have exactly one item of type 1.";
+      }
+    } else if (formData.process_type === 'D') {
+      // Rule: Exactly one Type 1, Exactly one Type 3, 0 or more Type 2
+      const hasExactlyOneType1 = typeCounts[1] === 1;
+      const hasExactlyOneType3 = typeCounts[3] === 1;
+
+      // Verification: Are there any types present that aren't 1, 2, or 3?
+      const invalidTypes = Object.keys(typeCounts).filter((type) => !['1', '2', '3'].includes(type));
+
+      if (!hasExactlyOneType1 || !hasExactlyOneType3) {
+        itemValidationError = "Type 'Standard' must have exactly one Type 1 and exactly one Type 3.";
+      } else if (invalidTypes.length > 0) {
+        itemValidationError = `Type 'Standard' contains invalid types: ${invalidTypes.join(', ')}.`;
+      }
+    }
+
+    if (itemValidationError) {
+      const newErrors = {
+        process_id: false,
+        process_type: false,
+        group_id: false,
+        description: false,
+        items: true,
+      };
+      setErrors(newErrors);
+
+      setSaveStatus({ design: 'Negative', message: itemValidationError });
       return;
     }
 

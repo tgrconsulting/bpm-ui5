@@ -100,7 +100,7 @@ export function ProcessGeneralForm({
     <div style={{ width: '100%', marginTop: '0.2rem' }}>
       <Form
         style={{ height: '100%' }}
-        labelSpan="S12 M3 L2 XL1"
+        labelSpan="S12 M4 L2 XL1"
         emptySpan="S0 M1 L2 XL4"
         layout="S1 M2 L2 XL2"
       >
