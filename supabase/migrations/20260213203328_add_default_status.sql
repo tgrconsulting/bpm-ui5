@@ -1,0 +1,1 @@
+ALTER TABLE "public"."tbl_processes" ALTER COLUMN "process_type" SET DEFAULT 'I';

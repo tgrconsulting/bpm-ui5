@@ -16,6 +16,10 @@ export default async function Page({ params }: PageProps) {
     notFound();
   }
 
+  if (!result.data.process_id?.trim()) {
+    result.data.process_status = 'I';
+  }
+
   return (
     <>
       <div

@@ -36,10 +36,13 @@ export function ProcessItemsTable({ items, onEdit, onDelete }: ProcessItemsTable
     return (
       <div
         style={{
+          marginTop: '2rem',
           textAlign: 'center',
         }}
       >
-        <Label>No items found for this process.</Label>
+        <Label>
+          <strong>No items found for this process.</strong>
+        </Label>
       </div>
     );
   }

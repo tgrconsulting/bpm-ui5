@@ -117,6 +117,7 @@ export function ProcessGeneralForm({
           <FormItem labelContent={<Label required>Type</Label>}>
             <ComboBox
               value={processTypeValue || ''}
+              readonly={isUpdate}
               valueState={errors.process_type ? 'Negative' : 'None'}
               onSelectionChange={handleTypeChange}
             >

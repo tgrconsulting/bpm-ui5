@@ -204,7 +204,7 @@ export function CreateItemDialog({
   return (
     <Dialog
       open={open}
-      headerText={editingItem ? 'Edit Process Event' : 'Create New Process Event'}
+      headerText={editingItem ? 'Edit Event' : 'Create New Event'}
       footer={
         <Bar
           design="Footer"

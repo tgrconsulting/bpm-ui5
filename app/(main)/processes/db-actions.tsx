@@ -129,6 +129,7 @@ export async function CreateProcess(process: Process): Promise<ActionResult> {
       ON CONFLICT (process_id) DO NOTHING
       RETURNING process_id
     `;
+
     const processResult = await query(processSql, [
       process.process_id.trim(),
       process.process_type.trim(),
