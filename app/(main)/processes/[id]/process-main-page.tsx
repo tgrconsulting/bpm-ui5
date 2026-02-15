@@ -4,7 +4,7 @@
 // Imports
 // ============================================================================
 
-import { isEqual, set } from 'lodash';
+import { isEqual } from 'lodash';
 import activateIcon from '@ui5/webcomponents-icons/dist/activate.js';
 import createIcon from '@ui5/webcomponents-icons/dist/create.js';
 import acceptIcon from '@ui5/webcomponents-icons/dist/accept.js';
@@ -17,7 +17,7 @@ import { useEffect, useState, useMemo } from 'react';
 import { ActionResult, CreateProcess, Process, ProcessEvent, UpdateProcess } from '../db-actions';
 import { CreateItemDialog } from './create-item-dialog';
 import { ProcessGeneralForm } from './process-general-form';
-import { ProcessItemsTable } from './processitems-table';
+import { ProcessEventsTable } from './process-events-table';
 
 // ============================================================================
 // Types
@@ -35,13 +35,13 @@ export default function ProcessPage({ initialData }: ProcessPageProps) {
   const router = useRouter();
 
   // --------------------------------------------------------------------------
-  // State Management
+  // State Management & Constants
   // --------------------------------------------------------------------------
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isStatusActive, setIsStatusActive] = useState<boolean>(initialData.process_status === 'A');
   const [editingItem, setEditingItem] = useState<ProcessEvent | null>(null);
-  const [pendingDeleteItem, setPendingDeleteItem] = useState<ProcessEvent | null>(null);
+  const [pendingDeleteItem, setPendingDeleteEvent] = useState<ProcessEvent | null>(null);
   const [isUpdate, setIsUpdate] = useState<boolean>(Boolean(initialData.process_id?.trim()));
   const [formData, setFormData] = useState<Process>(initialData);
   const [saveStatus, setSaveStatus] = useState<{
@@ -78,7 +78,7 @@ export default function ProcessPage({ initialData }: ProcessPageProps) {
 
   /**
    * Handles saving a new or edited process event.
-   * For new events: Adds to the processItems array.
+   * For new events: Adds to the processEvents array.
    * For edits: Updates the existing event in the array.
    *
    * @param newItem - The event data to save (excluding process_id)
@@ -92,12 +92,12 @@ export default function ProcessPage({ initialData }: ProcessPageProps) {
 
       if (isEdit && editingItem) {
         // 1. Update existing event
-        updatedItems = (prev.processItems || []).map((item) =>
+        updatedItems = (prev.processEvents || []).map((item) =>
           item.type === editingItem.type && item.sequence === editingItem.sequence ? { ...item, ...newItem } : item,
         );
       } else {
         // 2. Add new event
-        updatedItems = [...(prev.processItems || []), { ...newItem, process_id: prev.process_id }];
+        updatedItems = [...(prev.processEvents || []), { ...newItem, process_id: prev.process_id }];
       }
 
       // 3. Sort the updated array by Type, then by Sequence
@@ -112,7 +112,7 @@ export default function ProcessPage({ initialData }: ProcessPageProps) {
 
       return {
         ...prev,
-        processItems: sortedItems,
+        processEvents: sortedItems,
       };
     });
 
@@ -136,7 +136,7 @@ export default function ProcessPage({ initialData }: ProcessPageProps) {
       const itemToDelete = pendingDeleteItem;
       setFormData((prev) => ({
         ...prev,
-        processItems: (prev.processItems || []).filter(
+        processEvents: (prev.processEvents || []).filter(
           (item) => !(item.type === itemToDelete.type && item.sequence === itemToDelete.sequence),
         ),
       }));
@@ -148,7 +148,7 @@ export default function ProcessPage({ initialData }: ProcessPageProps) {
         setSaveStatus(null);
       }, 3000);
     }
-    setPendingDeleteItem(null);
+    setPendingDeleteEvent(null);
   };
 
   const handleActivate = () => {
@@ -179,7 +179,7 @@ export default function ProcessPage({ initialData }: ProcessPageProps) {
     }
 
     // Validation of process items
-    const items = formData.processItems || [];
+    const items = formData.processEvents || [];
     const typeCounts = items.reduce((acc: Record<string, number>, item) => {
       acc[item.type] = (acc[item.type] || 0) + 1;
       return acc;
@@ -372,10 +372,10 @@ export default function ProcessPage({ initialData }: ProcessPageProps) {
               marginBottom: '0.5rem',
             }}
           >
-            <ProcessItemsTable
-              items={formData.processItems || []}
+            <ProcessEventsTable
+              items={formData.processEvents || []}
               onEdit={handleEditItem}
-              onDelete={(item) => setPendingDeleteItem(item)}
+              onDelete={(item) => setPendingDeleteEvent(item)}
             />
           </div>
         </div>
@@ -387,7 +387,7 @@ export default function ProcessPage({ initialData }: ProcessPageProps) {
             setEditingItem(null);
           }}
           applications={initialData.applications || []}
-          existingItems={formData.processItems || []}
+          existingItems={formData.processEvents || []}
           editingItem={editingItem}
         />
       </Page>

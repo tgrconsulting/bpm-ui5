@@ -4,13 +4,15 @@
 // Imports
 // ============================================================================
 
+import acceptIcon from '@ui5/webcomponents-icons/dist/accept.js';
 import navBackIcon from '@ui5/webcomponents-icons/dist/nav-back.js';
 import saveIcon from '@ui5/webcomponents-icons/dist/save.js';
-import { Bar, Button, Form, FormItem, Input, Label, Page, Title, MessageStrip } from '@ui5/webcomponents-react';
+import { Bar, Button, Form, FormItem, Icon, Input, Label, MessageStrip, Page, Title } from '@ui5/webcomponents-react';
+import { isEqual } from 'lodash';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 
-import { Application, CreateApplication, UpdateApplication, ActionResult } from './../db-actions';
+import { ActionResult, Application, CreateApplication, UpdateApplication } from './../db-actions';
 
 // ============================================================================
 // Types
@@ -33,7 +35,7 @@ export default function ApplicationForm({ initialData }: ApplicationFormProps) {
   const isUpdate = Boolean(initialData.application_id?.trim());
 
   // --------------------------------------------------------------------------
-  // State Management
+  // State Management & Constants
   // --------------------------------------------------------------------------
 
   const [formData, setFormData] = useState<Application>(initialData);
@@ -45,6 +47,11 @@ export default function ApplicationForm({ initialData }: ApplicationFormProps) {
     application_id: false,
     description: false,
   });
+  const [baseData, setBaseData] = useState<Application>(initialData);
+
+  const isDirty = useMemo(() => {
+    return !isEqual(formData, baseData);
+  }, [formData, baseData]);
 
   // --------------------------------------------------------------------------
   // Event Handlers
@@ -85,6 +92,7 @@ export default function ApplicationForm({ initialData }: ApplicationFormProps) {
 
     // Response Handling
     if (result.success) {
+      setBaseData(formData);
       setSaveStatus({
         design: 'Positive',
         message: `Application ${isUpdate ? 'updated' : 'created'} successfully!`,
@@ -154,6 +162,10 @@ export default function ApplicationForm({ initialData }: ApplicationFormProps) {
               >
                 Save
               </Button>
+              <Icon
+                design={isDirty ? 'Negative' : 'Positive'}
+                name={acceptIcon}
+              />
             </div>
           }
         />
@@ -176,7 +188,7 @@ export default function ApplicationForm({ initialData }: ApplicationFormProps) {
       }
     >
       <Form
-        style={{ width: '100%', height: '100%', marginTop: '2rem' }}
+        style={{ width: '100%', height: '100%' }}
         labelSpan="S12 M2 L2 XL1"
         emptySpan="S0 M3 L5 XL7"
         layout="S1 M1 L1 XL1"

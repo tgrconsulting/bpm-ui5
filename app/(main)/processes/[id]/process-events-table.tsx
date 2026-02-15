@@ -16,7 +16,7 @@ import {
   Label,
   TableRowAction,
 } from '@ui5/webcomponents-react';
-import { ProcessEvent } from './../db-actions';
+import { ProcessEvent } from '../db-actions';
 
 interface ProcessItemsTableProps {
   items: ProcessEvent[];
@@ -31,7 +31,7 @@ const TYPE_MAP: Record<number, string> = {
   3: 'End',
 };
 
-export function ProcessItemsTable({ items, onEdit, onDelete }: ProcessItemsTableProps) {
+export function ProcessEventsTable({ items, onEdit, onDelete }: ProcessItemsTableProps) {
   if (!items || items.length === 0) {
     return (
       <div

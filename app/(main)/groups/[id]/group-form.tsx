@@ -4,13 +4,14 @@
 // Imports
 // ============================================================================
 
+import acceptIcon from '@ui5/webcomponents-icons/dist/accept.js';
 import navBackIcon from '@ui5/webcomponents-icons/dist/nav-back.js';
 import saveIcon from '@ui5/webcomponents-icons/dist/save.js';
-import { Bar, Button, Form, FormItem, Input, Label, Page, Title, MessageStrip } from '@ui5/webcomponents-react';
+import { Bar, Button, Form, FormItem, Icon, Input, Label, MessageStrip, Page, Title } from '@ui5/webcomponents-react';
+import { isEqual } from 'lodash';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
-
-import { Group, CreateGroup, UpdateGroup, ActionResult } from '../db-actions';
+import { useMemo, useState } from 'react';
+import { ActionResult, CreateGroup, Group, UpdateGroup } from '../db-actions';
 
 // ============================================================================
 // Types
@@ -33,7 +34,7 @@ export default function GroupForm({ initialData }: GroupFormProps) {
   const isUpdate = Boolean(initialData.group_id?.trim());
 
   // --------------------------------------------------------------------------
-  // State Management
+  // State Management & Constants
   // --------------------------------------------------------------------------
 
   const [formData, setFormData] = useState<Group>(initialData);
@@ -45,17 +46,16 @@ export default function GroupForm({ initialData }: GroupFormProps) {
     group_id: false,
     description: false,
   });
+  const [baseData, setBaseData] = useState<Group>(initialData);
+
+  const isDirty = useMemo(() => {
+    return !isEqual(formData, baseData);
+  }, [formData, baseData]);
 
   // --------------------------------------------------------------------------
   // Event Handlers
   // --------------------------------------------------------------------------
 
-  /**
-   * Validates form input and triggers the appropriate database action.
-   * Shows success/error feedback in status bar and refreshes page on success.
-   *
-   * @returns {Promise<void>}
-   */
   const handleSave = async () => {
     setSaveStatus(null);
 
@@ -85,6 +85,7 @@ export default function GroupForm({ initialData }: GroupFormProps) {
 
     // Response Handling
     if (result.success) {
+      setBaseData(formData);
       setSaveStatus({
         design: 'Positive',
         message: `Group ${isUpdate ? 'updated' : 'created'} successfully!`,
@@ -102,23 +103,11 @@ export default function GroupForm({ initialData }: GroupFormProps) {
     }
   };
 
-  /**
-   * Handles group ID input changes.
-   *
-   * @param {any} e - The input event
-   * @returns {void}
-   */
   const handleGroupIdChange = (e: any) => {
     setFormData({ ...formData, group_id: e.target.value });
     if (errors.group_id) setErrors({ ...errors, group_id: false });
   };
 
-  /**
-   * Handles description input changes.
-   *
-   * @param {any} e - The input event
-   * @returns {void}
-   */
   const handleDescriptionChange = (e: any) => {
     setFormData({ ...formData, description: e.target.value });
     if (errors.description) setErrors({ ...errors, description: false });
@@ -154,6 +143,10 @@ export default function GroupForm({ initialData }: GroupFormProps) {
               >
                 Save
               </Button>
+              <Icon
+                design={isDirty ? 'Negative' : 'Positive'}
+                name={acceptIcon}
+              />
             </div>
           }
         />
@@ -176,7 +169,7 @@ export default function GroupForm({ initialData }: GroupFormProps) {
       }
     >
       <Form
-        style={{ width: '100%', height: '100%', marginTop: '2rem' }}
+        style={{ width: '100%', height: '100%' }}
         labelSpan="S12 M2 L2 XL1"
         emptySpan="S0 M3 L5 XL7"
         layout="S1 M1 L1 XL1"

@@ -18,7 +18,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           }}
         />
       </head>
-      <body>
+      <body className="ui5-content-density-compact">
         <div className="appShell">
           <AuthProvider>
             <ThemeProvider>

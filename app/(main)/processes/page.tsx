@@ -81,7 +81,7 @@ export default function ProcessPage() {
   /**
    * Orchestrates the deletion confirmation and feedback loop.
    */
-  const handleConfirmDelete = async (action: MessageBoxAction | undefined) => {
+  const handleConfirmDelete = async (action: string | undefined) => {
     if (action === MessageBoxAction.OK && pendingDeleteId) {
       const result = await DeleteProcess(pendingDeleteId);
 
@@ -101,7 +101,7 @@ export default function ProcessPage() {
     <>
       <MessageBox
         open={!!pendingDeleteId}
-        onClose={(e: any) => handleConfirmDelete(e?.detail?.action)}
+        onClose={handleConfirmDelete}
         type="Confirm"
       >
         Are you sure you want to delete Process {pendingDeleteId}?

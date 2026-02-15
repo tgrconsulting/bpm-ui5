@@ -13,7 +13,7 @@ export interface Process {
   process_status: string;
   description: string;
   group_id: string;
-  processItems?: ProcessEvent[];
+  processEvents?: ProcessEvent[];
   groups?: Group[];
   applications?: Application[];
 }
@@ -84,7 +84,7 @@ export async function ReadProcess(id: string): Promise<ActionResult<Process>> {
           group_id: '',
           process_status: '',
           description: '',
-          processItems: [],
+          processEvents: [],
           groups: availableGroups,
           applications: availableApplications,
         },
@@ -105,7 +105,7 @@ export async function ReadProcess(id: string): Promise<ActionResult<Process>> {
       success: true,
       data: {
         ...(processResult.rows[0] as Process),
-        processItems: eventsResult.rows as ProcessEvent[],
+        processEvents: eventsResult.rows as ProcessEvent[],
         groups: availableGroups,
         applications: availableApplications,
       },
@@ -143,8 +143,8 @@ export async function CreateProcess(process: Process): Promise<ActionResult> {
       return { success: false, error: `Process ID "${process.process_id}" already exists.` };
     }
 
-    if (process.processItems && process.processItems.length > 0) {
-      for (const pi of process.processItems) {
+    if (process.processEvents && process.processEvents.length > 0) {
+      for (const pi of process.processEvents) {
         await query(
           'INSERT INTO tbl_processevents (process_id, type, sequence, description, application_id, duration) VALUES ($1, $2, $3, $4, $5, $6)',
           [
@@ -196,11 +196,11 @@ export async function UpdateProcess(id: string, process: Process): Promise<Actio
       return { success: false, error: `Process with ID "${id}" not found.` };
     }
 
-    // 2. Refresh items: Delete existing and re-insert new ones
+    // 2. Refresh events: Delete existing and re-insert new ones
     await query('DELETE FROM tbl_processevents WHERE process_id = $1', [id]);
 
-    if (process.processItems && process.processItems.length > 0) {
-      for (const pi of process.processItems) {
+    if (process.processEvents && process.processEvents.length > 0) {
+      for (const pi of process.processEvents) {
         await query(
           'INSERT INTO tbl_processevents (process_id, type, sequence, description, application_id, duration) VALUES ($1, $2, $3, $4, $5, $6)',
           [id, pi.type, pi.sequence, pi.description.trim(), pi.application_id.trim(), pi.duration],
@@ -234,7 +234,7 @@ export async function DeleteProcess(id: string): Promise<ActionResult> {
     }
 
     await query('COMMIT', []);
-    revalidatePath('/Process');
+    revalidatePath('/Processes');
     return { success: true };
   } catch (error) {
     await query('ROLLBACK', []);
