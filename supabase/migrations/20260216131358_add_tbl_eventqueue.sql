@@ -9,4 +9,4 @@ CREATE TABLE tbl_eventqueue (
     predecessor_key VARCHAR(128),
     message VARCHAR(128)
 );
-ALTER TABLE "public"."tbl_processevents" RENAME COLUMN "type" TO "event_type";ALTER TABLE "public"."tbl_processevents" RENAME COLUMN "type" TO "event_type";
+ALTER TABLE "public"."tbl_processevents" RENAME COLUMN "type" TO "event_type";
