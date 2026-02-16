@@ -3,6 +3,7 @@
 // =============================================================================
 // Imports
 // =============================================================================
+
 import { TABLE_ROW_LIMIT } from '@/lib/constants';
 import createIcon from '@ui5/webcomponents-icons/dist/create.js';
 import '@ui5/webcomponents-icons/dist/delete.js';
@@ -25,14 +26,11 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { GroupsTable } from './groups-table';
 import { DeleteGroup, ReadGroups, type Group } from './db-actions';
 
-/**
- * GroupsPage Component
- * Provides a searchable, paginated list of Groups with CRUD capabilities.
- */
 export default function GroupsPage() {
   // ---------------------------------------------------------------------------
   // Hooks & Constants
   // ---------------------------------------------------------------------------
+
   const LIMIT = TABLE_ROW_LIMIT;
   const initialFetched = useRef(false);
   const router = useRouter();
@@ -40,6 +38,7 @@ export default function GroupsPage() {
   // ---------------------------------------------------------------------------
   // State Management
   // ---------------------------------------------------------------------------
+
   const [data, setData] = useState<Group[]>([]);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(false);
@@ -50,6 +49,7 @@ export default function GroupsPage() {
   // ---------------------------------------------------------------------------
   // Side Effects
   // ---------------------------------------------------------------------------
+
   useEffect(() => {
     if (!initialFetched.current) {
       initialFetched.current = true;
@@ -61,9 +61,6 @@ export default function GroupsPage() {
   // Data Handlers
   // ---------------------------------------------------------------------------
 
-  /**
-   * Fetches Groups from the database
-   */
   const loadMoreData = async (isInitial = false) => {
     if (loading) return;
     setLoading(true);
@@ -78,9 +75,6 @@ export default function GroupsPage() {
     setLoading(false);
   };
 
-  /**
-   * Memoized filter logic for client-side search
-   */
   const filteredData = useMemo(() => {
     if (!searchQuery) return data;
     const lowerQuery = searchQuery.toLowerCase();
@@ -93,9 +87,6 @@ export default function GroupsPage() {
   // Action Handlers
   // ---------------------------------------------------------------------------
 
-  /**
-   * Handles the deletion confirmation flow and status feedback
-   */
   const handleClose = async (action: string | undefined) => {
     if (action === MessageBoxAction.OK && pendingDeleteId) {
       const result = await DeleteGroup(pendingDeleteId);
@@ -107,7 +98,6 @@ export default function GroupsPage() {
         setStatus({ design: 'Negative', message: result.error || `Failed to delete ${pendingDeleteId}.` });
       }
 
-      // Auto-clear status after 5 seconds
       setTimeout(() => setStatus(null), 5000);
     }
     setPendingDeleteId(null);
@@ -116,6 +106,7 @@ export default function GroupsPage() {
   // =============================================================================
   // Main Render
   // =============================================================================
+
   return (
     <>
       <MessageBox
