@@ -1,10 +1,5 @@
 'use client';
 
-/**
- * ProcessItemsTable Component
- * Renders a list of items with edit and delete actions.
- */
-
 import editIcon from '@ui5/webcomponents-icons/dist/edit.js';
 import deleteIcon from '@ui5/webcomponents-icons/dist/delete.js';
 import {
@@ -74,7 +69,7 @@ export function ProcessEventsTable({ items, onEdit, onDelete }: ProcessItemsTabl
     >
       {items.map((item) => (
         <TableRow
-          key={`${item.process_id}-${item.type}-${item.sequence}`}
+          key={`${item.process_id}-${item.event_type}-${item.sequence}`}
           actions={
             <>
               <TableRowAction
@@ -92,7 +87,7 @@ export function ProcessEventsTable({ items, onEdit, onDelete }: ProcessItemsTabl
         >
           <TableCell>
             {/* Display the mapped string, or the number itself if not found */}
-            <Label>{TYPE_MAP[item.type as number] || item.type}</Label>
+            <Label>{TYPE_MAP[item.event_type as number] || item.event_type}</Label>
           </TableCell>
           <TableCell>
             <Label>{item.sequence}</Label>

@@ -71,7 +71,7 @@ export function CreateItemDialog({
   useEffect(() => {
     if (open) {
       if (editingItem) {
-        setType(editingItem.type);
+        setType(editingItem.event_type);
         setSequence(editingItem.sequence.toString());
         setDescription(editingItem.description);
         setApplicationId(editingItem.application_id);
@@ -145,9 +145,9 @@ export function CreateItemDialog({
     // Check for duplicate (type, sequence) combination
     const isDuplicate = existingItems.some(
       (item) =>
-        item.type === type &&
+        item.event_type === type &&
         item.sequence === seqNumber &&
-        !(editingItem && editingItem.type === type && editingItem.sequence === seqNumber),
+        !(editingItem && editingItem.event_type === type && editingItem.sequence === seqNumber),
     );
 
     if (isDuplicate) {
@@ -157,7 +157,7 @@ export function CreateItemDialog({
 
     onSave(
       {
-        type,
+        event_type: type,
         sequence: seqNumber,
         description: description.trim(),
         application_id: applicationId.trim(),

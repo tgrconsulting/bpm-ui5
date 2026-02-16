@@ -93,18 +93,20 @@ export default function ProcessPage({ initialData }: ProcessPageProps) {
       if (isEdit && editingItem) {
         // 1. Update existing event
         updatedItems = (prev.processEvents || []).map((item) =>
-          item.type === editingItem.type && item.sequence === editingItem.sequence ? { ...item, ...newItem } : item,
+          item.event_type === editingItem.event_type && item.sequence === editingItem.sequence
+            ? { ...item, ...newItem }
+            : item,
         );
       } else {
         // 2. Add new event
         updatedItems = [...(prev.processEvents || []), { ...newItem, process_id: prev.process_id }];
       }
 
-      // 3. Sort the updated array by Type, then by Sequence
+      // 3. Sort the updated array by Event Type, then by Sequence
       const sortedItems = [...updatedItems].sort((a, b) => {
-        // Sort by Type (numeric)
-        if (a.type !== b.type) {
-          return a.type - b.type;
+        // Sort by Event Type (numeric)
+        if (a.event_type !== b.event_type) {
+          return a.event_type - b.event_type;
         }
         // If Types are equal, sort by Sequence (numeric)
         return a.sequence - b.sequence;
@@ -137,7 +139,7 @@ export default function ProcessPage({ initialData }: ProcessPageProps) {
       setFormData((prev) => ({
         ...prev,
         processEvents: (prev.processEvents || []).filter(
-          (item) => !(item.type === itemToDelete.type && item.sequence === itemToDelete.sequence),
+          (item) => !(item.event_type === itemToDelete.event_type && item.sequence === itemToDelete.sequence),
         ),
       }));
       setSaveStatus({
@@ -181,7 +183,7 @@ export default function ProcessPage({ initialData }: ProcessPageProps) {
     // Validation of process items
     const items = formData.processEvents || [];
     const typeCounts = items.reduce((acc: Record<string, number>, item) => {
-      acc[item.type] = (acc[item.type] || 0) + 1;
+      acc[item.event_type] = (acc[item.event_type] || 0) + 1;
       return acc;
     }, {});
 
@@ -256,8 +258,8 @@ export default function ProcessPage({ initialData }: ProcessPageProps) {
         type="Confirm"
       >
         Are you sure you want to delete this Process Event (Type:{' '}
-        {pendingDeleteItem?.type === 1 ? 'Start' : pendingDeleteItem?.type === 2 ? 'Intermediate' : 'End'}, Sequence:{' '}
-        {pendingDeleteItem?.sequence})?
+        {pendingDeleteItem?.event_type === 1 ? 'Start' : pendingDeleteItem?.event_type === 2 ? 'Intermediate' : 'End'},
+        Sequence: {pendingDeleteItem?.sequence})?
       </MessageBox>
 
       <Page

@@ -20,7 +20,7 @@ export interface Process {
 
 export interface ProcessEvent {
   process_id: string;
-  type: number;
+  event_type: number;
   sequence: number;
   description: string;
   application_id: string;
@@ -97,7 +97,7 @@ export async function ReadProcess(id: string): Promise<ActionResult<Process>> {
     }
 
     const eventsResult = await query(
-      'SELECT * FROM tbl_processevents WHERE process_id = $1 ORDER BY type ASC, sequence ASC',
+      'SELECT * FROM tbl_processevents WHERE process_id = $1 ORDER BY event_type ASC, sequence ASC',
       [id],
     );
 
@@ -146,10 +146,10 @@ export async function CreateProcess(process: Process): Promise<ActionResult> {
     if (process.processEvents && process.processEvents.length > 0) {
       for (const pi of process.processEvents) {
         await query(
-          'INSERT INTO tbl_processevents (process_id, type, sequence, description, application_id, duration) VALUES ($1, $2, $3, $4, $5, $6)',
+          'INSERT INTO tbl_processevents (process_id, event_type, sequence, description, application_id, duration) VALUES ($1, $2, $3, $4, $5, $6)',
           [
             process.process_id.trim(),
-            pi.type,
+            pi.event_type,
             pi.sequence,
             pi.description.trim(),
             pi.application_id.trim(),
@@ -202,8 +202,8 @@ export async function UpdateProcess(id: string, process: Process): Promise<Actio
     if (process.processEvents && process.processEvents.length > 0) {
       for (const pi of process.processEvents) {
         await query(
-          'INSERT INTO tbl_processevents (process_id, type, sequence, description, application_id, duration) VALUES ($1, $2, $3, $4, $5, $6)',
-          [id, pi.type, pi.sequence, pi.description.trim(), pi.application_id.trim(), pi.duration],
+          'INSERT INTO tbl_processevents (process_id, event_type, sequence, description, application_id, duration) VALUES ($1, $2, $3, $4, $5, $6)',
+          [id, pi.event_type, pi.sequence, pi.description.trim(), pi.application_id.trim(), pi.duration],
         );
       }
     }
